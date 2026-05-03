@@ -27,6 +27,9 @@ set(company_bundle_id "com.ModernRealTimeAudio")
 
 ## Plugin projects
 
+# DSP directory helper variable
+set(dsp_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/DSP)
+
 # Example project
 set(mfrtaa_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/MyFirstRealTimeAudioApp)
 
@@ -41,3 +44,21 @@ add_plugin(mfrtaa
         ${mfrtaa_source}/PluginProcessor.cpp
     INCLUDE_DIRS
         ${mfrtaa_source})
+
+# ParametricEQ project
+set(parameq_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/ParametricEQ)
+
+add_plugin(parameq
+    VERSION 0.1.0
+    PLUGIN_NAME "Parametric EQ"
+    PROD_NAME ParametricEQ
+    PROD_CODE Pmeq
+    SYNTH FALSE
+    SOURCES
+        ${parameq_source}/ParametricEQEditor.cpp
+        ${parameq_source}/ParametricEQProcessor.cpp
+        ${dsp_source}/Biquad.cpp
+        ${dsp_source}/ParametricEqualizer.cpp
+    INCLUDE_DIRS
+        ${parameq_source}
+        ${dsp_source})
