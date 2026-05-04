@@ -11,7 +11,10 @@ ParametricEqualizer::ParametricEqualizer(unsigned int numOfBands, unsigned int m
 {
     unsigned int b { 0 };
     for (const auto& band : bands)
-        biquad.setSectionCoeffs(calculateCoeffs(band), b++);
+    {
+        biquad.setSectionCoeffs(calculateCoeffs(band), b);
+        ++b;
+    }
 }
 
 ParametricEqualizer::~ParametricEqualizer()
@@ -31,7 +34,10 @@ void ParametricEqualizer::prepare(double newSampleRate, unsigned int maxNumChann
 
     unsigned int b { 0 };
     for (const auto& band : bands)
-        biquad.setSectionCoeffs(calculateCoeffs(band), b++);
+    {
+        biquad.setSectionCoeffs(calculateCoeffs(band), b);
+        ++b;
+    }
 }
 
 void ParametricEqualizer::process(float* const* output, const float* const* input, unsigned int numChannels, unsigned int numSamples)
@@ -112,7 +118,7 @@ std::array<float, DSP::Biquad::CoeffsPerSection> ParametricEqualizer::calculateC
             float beta = std::sin(omega) * std::sqrt(A) / band.reso;
             float aminus1TimesCoso = aminus1 * coso;
 
-            float a0 = 1.f / (aplus1 + aminus1TimesCoso + beta);
+            float a0 = 1.f / std::fmax(aplus1 + aminus1TimesCoso + beta, 1e-12f);
             coeffs = { A * (aplus1 - aminus1TimesCoso + beta) * a0, // b0
                        A * 2.f * (aminus1 - aplus1 * coso) * a0, // b1
                        A * (aplus1 - aminus1TimesCoso - beta) * a0, // b2
@@ -125,22 +131,22 @@ std::array<float, DSP::Biquad::CoeffsPerSection> ParametricEqualizer::calculateC
         {
             float A = std::sqrt(std::pow(10.f, band.gain * 0.05f));
             float omega = (2.f * static_cast<float>(M_PI) * band.freq) / static_cast<float>(sampleRate);
-            float alpha = std::sin(omega) / (band.reso * 2.f);
+            float alpha = std::sin(omega) / std::fmax(band.reso * 2.f, 1e-12f);
             float c2 = -2.f * std::cos(omega);
             float alphaTimesA = alpha * A;
-            float alphaOverA = alpha / A;
+            float alphaOverA = alpha / std::fmax(A, 1e-12f);
 
-            float a0 = 1.f / (1.f + alphaOverA);
+            float a0 = 1.f / std::fmax(1.f + alphaOverA, 1e-12f);
             coeffs = { (1.f + alphaTimesA) * a0, c2 * a0, (1.f - alphaTimesA) * a0, c2 * a0, (1.f - alphaOverA) * a0 };
         }
         break;
 
         case LowPass:
         {
-            float n = 1.f / std::tan(static_cast<float>(M_PI) * band.freq / static_cast<float>(sampleRate));
+            float n = 1.f / std::fmax(std::tan(static_cast<float>(M_PI) * band.freq / static_cast<float>(sampleRate)), 1e-12f);
             float nSquared = n * n;
-            float invQ = 1.f / band.reso;
-            float c1 = 1.f / (1.f + invQ * n + nSquared);
+            float invQ = 1.f / std::fmax(band.reso, 1e-12f);
+            float c1 = 1.f / std::fmax(1.f + invQ * n + nSquared, 1e-12f);
 
             coeffs = { c1, c1 * 2.f, c1, c1 * 2.f * (1.f - nSquared), c1 * (1.f - invQ * n + nSquared) };
         }
@@ -153,10 +159,10 @@ std::array<float, DSP::Biquad::CoeffsPerSection> ParametricEqualizer::calculateC
             float aplus1 = A + 1.f;
             float omega = (2.f * static_cast<float>(M_PI) * band.freq) / static_cast<float>(sampleRate);
             float coso = std::cos(omega);
-            float beta = std::sin(omega) * std::sqrt(A) / band.reso;
+            float beta = std::sin(omega) * std::sqrt(A) / std::fmax(band.reso, 1e-12f);
             float aminus1TimesCoso = aminus1 * coso;
 
-            float a0 = 1.f / (aplus1 - aminus1TimesCoso + beta);
+            float a0 = 1.f / std::fmax(aplus1 - aminus1TimesCoso + beta, 1e-12f);
             coeffs = { A * (aplus1 + aminus1TimesCoso + beta) * a0,
                        A * -2.f * (aminus1 + aplus1 * coso) * a0,
                        A * (aplus1 + aminus1TimesCoso - beta) * a0,
