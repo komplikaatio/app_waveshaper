@@ -98,3 +98,21 @@ add_plugin(ringmod
     INCLUDE_DIRS
         ${dsp_source}
         ${ringmod_source})
+
+# flanger project
+set(flanger_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/Flanger)
+
+add_plugin(flanger
+    VERSION 0.1.0
+    PLUGIN_NAME "Flanger"
+    PROD_NAME Flanger
+    PROD_CODE Flng
+    SYNTH FALSE
+    SOURCES
+        ${flanger_source}/FlangerEditor.cpp
+        ${flanger_source}/FlangerProcessor.cpp
+        ${dsp_source}/DelayLine.cpp
+        ${dsp_source}/Flanger.cpp
+    INCLUDE_DIRS
+        ${dsp_source}
+        ${flanger_source})
