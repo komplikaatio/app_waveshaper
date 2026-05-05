@@ -55,7 +55,7 @@ MainProcessor::MainProcessor() :
             DBG(Param::Name::PostGain + ": " + juce::String { value });
             float dbValue { 0.f };
             if (value > -60.f)
-            dbValue = std::pow(10.f, value * 0.05f);
+                dbValue = std::pow(10.f, value * 0.05f);
 
             if (forced)
                 outputGain.setCurrentAndTargetValue(dbValue);

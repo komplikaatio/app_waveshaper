@@ -62,3 +62,22 @@ add_plugin(parameq
     INCLUDE_DIRS
         ${parameq_source}
         ${dsp_source})
+
+# Cabinet Simulator project
+set(cabsim_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/CabinetSimulator)
+
+add_plugin(cabsim
+    VERSION 0.1.0
+    PLUGIN_NAME "Cabinet Simulator"
+    PROD_NAME CabinetSimulator
+    PROD_CODE Csim
+    SYNTH FALSE
+    SOURCES
+        ${cabsim_source}/CabinetSimulatorEditor.cpp
+        ${cabsim_source}/CabinetSimulatorProcessor.cpp
+        ${cabsim_source}/Cab2x12.c
+        ${cabsim_source}/Cab4x12.c
+        ${dsp_source}/FIR.cpp
+    INCLUDE_DIRS
+        ${cabsim_source}
+        ${dsp_source})
