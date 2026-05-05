@@ -81,3 +81,20 @@ add_plugin(cabsim
     INCLUDE_DIRS
         ${cabsim_source}
         ${dsp_source})
+
+# ring mod project
+set(ringmod_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/RingModulator)
+
+add_plugin(ringmod
+    VERSION 0.1.0
+    PLUGIN_NAME "Ring Modulator"
+    PROD_NAME RingModulator
+    PROD_CODE Rmod
+    SYNTH FALSE
+    SOURCES
+        ${ringmod_source}/RingModulatorEditor.cpp
+        ${ringmod_source}/RingModulatorProcessor.cpp
+        ${dsp_source}/RingMod.cpp
+    INCLUDE_DIRS
+        ${dsp_source}
+        ${ringmod_source})
