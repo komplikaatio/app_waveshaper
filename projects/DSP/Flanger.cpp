@@ -1,6 +1,7 @@
 #include "Flanger.h"
 
 #include <cmath>
+#include <algorithm>
 
 namespace DSP
 {
@@ -38,10 +39,12 @@ void Flanger::clear()
 
 void Flanger::process(float* const* output, const float* const* input, unsigned int numChannels, unsigned int numSamples)
 {
+    numChannels = std::min(numChannels, MaxChannels);
+
     for (unsigned int n = 0; n < numSamples; ++n)
     {
         // Process LFO acording to mod type
-        float lfo[2] { 0.f, 0.f };
+        float lfo[MaxChannels] { 0.f, 0.f };
         switch (modType)
         {
         case Tri:
@@ -64,8 +67,8 @@ void Flanger::process(float* const* output, const float* const* input, unsigned 
         offsetRamp.applySum(lfo, numChannels);
 
         // Delay in/out
-        float x[2];
-        float y[2];
+        float x[MaxChannels];
+        float y[MaxChannels];
 
         for (unsigned int ch = 0; ch < numChannels; ++ch)
             x[ch] = input[ch][n];

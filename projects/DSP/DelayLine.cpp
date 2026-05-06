@@ -25,8 +25,7 @@ void DelayLine::clear()
 void DelayLine::prepare(unsigned int maxLengthSamples, unsigned int numChannels)
 {
     delayBuffer.clear();
-    for (unsigned int ch = 0; ch < numChannels; ++ch)
-        delayBuffer.emplace_back(maxLengthSamples, 0.f);
+    delayBuffer.resize(numChannels, std::vector<float>(maxLengthSamples, 0.f));
 }
 
 void DelayLine::process(float* const* output, const float* const* input, unsigned int numChannels, unsigned int numSamples)

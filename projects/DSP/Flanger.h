@@ -50,7 +50,7 @@ public:
     // Set delay time modulation waveform type
     void setModulationType(ModulationType newModType);
 
-    static constexpr int MaxChannels { 2 };
+    static constexpr unsigned int MaxChannels { 2 };
 
 private:
     double sampleRate { 48000.0 };

@@ -14,7 +14,7 @@ static const std::vector<mrta::ParameterInfo> parameters
 
 FlangerProcessor::FlangerProcessor() :
     mrta::BaseProcessor(parameters),
-    flanger(MaxDelaySizeMs, 2),
+    flanger(MaxDelaySizeMs, DSP::Flanger::MaxChannels),
     enableRamp(0.05f)
 {
     registerParameterCallback(Param::ID::Enabled,
@@ -58,6 +58,7 @@ void FlangerProcessor::prepare(double sampleRate, int samplesPerBlock)
 {
     const unsigned int numChannels { static_cast<unsigned int>(std::max(getMainBusNumInputChannels(), getMainBusNumOutputChannels())) };
 
+    flanger.clear();
     flanger.prepare(sampleRate, MaxDelaySizeMs, numChannels);
     enableRamp.prepare(sampleRate, true, enabled ? 1.f : 0.f);
 
