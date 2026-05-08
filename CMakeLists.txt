@@ -154,3 +154,20 @@ add_plugin(envgen
     INCLUDE_DIRS
         ${dsp_source}
         ${envgen_source})
+
+# osc project
+set(osc_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/Oscillators)
+
+add_plugin(osc
+    VERSION 0.1.0
+    PLUGIN_NAME "Oscillators"
+    PROD_NAME Oscillators
+    PROD_CODE Oscs
+    SYNTH FALSE
+    SOURCES
+        ${osc_source}/OscillatorsEditor.cpp
+        ${osc_source}/OscillatorsProcessor.cpp
+        ${dsp_source}/Oscillator.cpp
+    INCLUDE_DIRS
+        ${dsp_source}
+        ${osc_source})
