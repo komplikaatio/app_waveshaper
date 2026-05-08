@@ -189,3 +189,21 @@ add_plugin(svf
     INCLUDE_DIRS
         ${dsp_source}
         ${svf_source})
+
+# midi handling project
+set(midi_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/MidiHandler)
+
+add_plugin(midi
+    VERSION 0.1.0
+    PLUGIN_NAME "Midi Handler"
+    PROD_NAME MidiHandler
+    PROD_CODE Mdhd
+    SYNTH TRUE
+    SOURCES
+        ${midi_source}/MidiHandlerEditor.cpp
+        ${midi_source}/MidiHandlerProcessor.cpp
+        ${dsp_source}/SynthVoice.cpp
+        ${dsp_source}/Oscillator.cpp
+    INCLUDE_DIRS
+        ${dsp_source}
+        ${midi_source})
