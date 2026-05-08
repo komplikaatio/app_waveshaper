@@ -171,3 +171,21 @@ add_plugin(osc
     INCLUDE_DIRS
         ${dsp_source}
         ${osc_source})
+
+# state variable filter project
+set(svf_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/StateVariableFilter)
+
+add_plugin(svf
+    VERSION 0.1.0
+    PLUGIN_NAME "State Variable Filter"
+    PROD_NAME StateVariableFilter
+    PROD_CODE Svff
+    SYNTH FALSE
+    SOURCES
+        ${svf_source}/SVFEditor.cpp
+        ${svf_source}/SVFProcessor.cpp
+        ${dsp_source}/StateVariableFilter.cpp
+        ${dsp_source}/Oscillator.cpp
+    INCLUDE_DIRS
+        ${dsp_source}
+        ${svf_source})
