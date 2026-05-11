@@ -14,7 +14,6 @@ public:
 
     static constexpr unsigned int MaxNumChannels { 2 };
     using atomic_array = std::atomic<std::array<float, MaxNumChannels>>;
-    atomic_array atomic_var;
 
     // prevent compiling unsupported CPUs
     static_assert(atomic_array::is_always_lock_free, "Not supported!");
@@ -25,8 +24,12 @@ public:
     const Meter& operator=(Meter&&) = delete;
 
     void prepare(double sampleRate, unsigned int numChannels);
+
+    // Buffer flavour
     void process(const float* const* input, unsigned int numChannels, unsigned int numSamples);
-    void process(const float* input, unsigned int numChannels);
+
+    // Single-sample flavour
+    void process(const float* const input, unsigned int numChannels);
 
     void setTimeConstant(float releaseTimeMs);
 

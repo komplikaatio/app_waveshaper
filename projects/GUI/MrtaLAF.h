@@ -1,6 +1,6 @@
 #pragma once
 
-#include <JuceHeader.h>
+#include <juce_gui_basics/juce_gui_basics.h>
 
 namespace GUI
 {
@@ -13,9 +13,9 @@ public:
 
     void drawRotarySlider(juce::Graphics&, int x, int y, int width, int height,
                           float sliderPosProportional, float rotaryStartAngle, float rotaryEndAngle,
-                          Slider&) override;
+                          juce::Slider&) override;
 
-    void drawButtonBackground(juce::Graphics&, Button&, const Colour& backgroundColour,
+    void drawButtonBackground(juce::Graphics&, juce::Button&, const juce::Colour& backgroundColour,
                               bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override;
 
     void drawButtonText(juce::Graphics&, juce::TextButton&,

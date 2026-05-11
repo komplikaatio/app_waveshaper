@@ -92,14 +92,18 @@ public:
     // Creates the GUI
     juce::AudioProcessorEditor* createEditor() override;
 
-    // Meter getter
-    DSP::Meter& getMeter() { return meter; }
+    // Output meter getter
+    DSP::Meter& getMeterOutput() { return meterOutput; }
+
+    // Input meter getter
+    DSP::Meter& getMeterInput() { return meterInput; }
 
 private:
     DSP::Delay delay;
     DSP::Ramp<float> wetRamp;
     DSP::Ramp<float> dryRamp;
-    DSP::Meter meter;
+    DSP::Meter meterOutput;
+    DSP::Meter meterInput;
 
     float enabled { 1.f };
     float mix { 0.5f };

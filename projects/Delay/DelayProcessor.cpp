@@ -78,7 +78,10 @@ void DelayProcessor::prepare(double newSampleRate, int samplesPerBlock)
     delay.prepare(newSampleRate, Param::Ranges::TimeMax, numChannels);
     wetRamp.prepare(newSampleRate);
     dryRamp.prepare(newSampleRate);
-    meter.prepare(newSampleRate, numChannels);
+    meterOutput.prepare(newSampleRate, numChannels);
+    meterOutput.setTimeConstant(250.f);
+    meterInput.prepare(newSampleRate, numChannels);
+    meterInput.setTimeConstant(250.f);
 
     fxBuffer.setSize(static_cast<int>(numChannels), samplesPerBlock);
     fxBuffer.clear();
@@ -92,8 +95,9 @@ void DelayProcessor::process(juce::AudioBuffer<float>& buffer, juce::MidiBuffer&
     for (int ch = 0; ch < static_cast<int>(numChannels); ++ch)
         fxBuffer.copyFrom(ch, 0, buffer, ch, 0, static_cast<int>(numSamples));
 
+    meterInput.process(fxBuffer.getArrayOfReadPointers(), numChannels, numSamples);
     delay.process(fxBuffer.getArrayOfWritePointers(), fxBuffer.getArrayOfReadPointers(), numChannels, numSamples);
-    meter.process(fxBuffer.getArrayOfReadPointers(), numChannels, numSamples);
+    meterOutput.process(fxBuffer.getArrayOfReadPointers(), numChannels, numSamples);
 
     wetRamp.applyGain(fxBuffer.getArrayOfWritePointers(), numChannels, numSamples);
     dryRamp.applyGain(buffer.getArrayOfWritePointers(), numChannels, numSamples);

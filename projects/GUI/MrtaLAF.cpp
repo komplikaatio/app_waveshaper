@@ -12,9 +12,9 @@ MrtaLAF::~MrtaLAF()
 {
 }
 
-void MrtaLAF::drawRotarySlider(Graphics& g, int x, int y, int width, int height,
+void MrtaLAF::drawRotarySlider(juce::Graphics& g, int x, int y, int width, int height,
                                float sliderPosProportional, float rotaryStartAngle, float rotaryEndAngle,
-                               Slider&)
+                               juce::Slider&)
 {
     // total area of out slider
     juce::Rectangle<float> area(x, y, width, height);

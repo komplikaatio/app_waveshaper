@@ -15,11 +15,16 @@ ParametricEQEditor::ParametricEQEditor(mrta::BaseProcessor& p) :
     addAndMakeVisible(band1ParameterEditor);
     addAndMakeVisible(band2ParameterEditor);
 
+    band0ParameterEditor.setLookAndFeel(&laf);
+    band2ParameterEditor.setLookAndFeel(&laf);
+
     setSize(NumOfBands * BandWidth, ParamsPerBand * ParamHeight);
 }
 
 ParametricEQEditor::~ParametricEQEditor()
 {
+    band0ParameterEditor.setLookAndFeel(nullptr);
+    band2ParameterEditor.setLookAndFeel(nullptr);
 }
 
 void ParametricEQEditor::paint(juce::Graphics&)

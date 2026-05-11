@@ -52,13 +52,13 @@ void MeterComponent::paint(juce::Graphics& g)
             g.setColour(juce::Colours::red);
         else
             g.setGradientFill(grad);
-        g.fillRect(leftChannelArea.getProportion(leftProp));
+        g.fillRoundedRectangle(leftChannelArea.getProportion(leftProp).toFloat(), 3.f);
 
         if (rightEnvelopeDb >= 0.f)
             g.setColour(juce::Colours::red);
         else
             g.setGradientFill(grad);
-        g.fillRect(rightChannelArea.getProportion(rightProp));
+        g.fillRoundedRectangle(rightChannelArea.getProportion(rightProp).toFloat(), 3.f);
     }
     else
     {
@@ -69,7 +69,7 @@ void MeterComponent::paint(juce::Graphics& g)
         juce::Rectangle<float> leftProp(0.f, 1.f - leftFillPropHeight,
                                         1.f, leftFillPropHeight);
 
-        g.setColour(juce::Colours::green);
+        g.setGradientFill(grad);
         g.fillRect(leftChannelArea.getProportion(leftProp));
     }
 }

@@ -15,7 +15,7 @@ public:
     ~MeterComponent();
 
     static constexpr float MIN_DB_SCALE { -90.f };
-    static constexpr float MAX_DB_SCALE { 0.f };
+    static constexpr float MAX_DB_SCALE { 12.f };
 
     void resized() override;
     void paint(juce::Graphics& g) override;

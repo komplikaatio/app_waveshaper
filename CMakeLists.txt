@@ -62,8 +62,10 @@ add_plugin(parameq
         ${parameq_source}/ParametricEQProcessor.cpp
         ${dsp_source}/Biquad.cpp
         ${dsp_source}/ParametricEqualizer.cpp
+        ${gui_source}/MrtaLAF.cpp
     INCLUDE_DIRS
         ${parameq_source}
+        ${gui_source}
         ${dsp_source})
 
 # Cabinet Simulator project
@@ -138,6 +140,7 @@ add_plugin(delay
         ${dsp_source}/ParametricEqualizer.cpp
         ${dsp_source}/Meter.cpp
         ${gui_source}/MeterComponent.cpp
+        ${gui_source}/MrtaLAF.cpp
     INCLUDE_DIRS
         ${dsp_source}
         ${gui_source}
