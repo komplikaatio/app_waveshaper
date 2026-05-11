@@ -67,7 +67,7 @@ private:
 
     EnvelopeState state { OFF };
 
-    static constexpr float delta { 1e-3 };
+    static constexpr float delta { 1e-3f };
 
     void doDigital(float* output, unsigned int numSamples);
     void doAnalog(float* output, unsigned int numSamples);

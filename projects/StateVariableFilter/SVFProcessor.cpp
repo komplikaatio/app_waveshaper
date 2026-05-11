@@ -13,11 +13,11 @@ void modeMix(float mode, float& lpf, float& bpf, float& hpf)
 
 static const std::vector<mrta::ParameterInfo> parameters
 {
-    { Param::ID::Freq,        Param::Name::Freq,      Param::Unit::Hz, 500.0f,  Param::Range::FreqMin,        Param::Range::FreqMax,        Param::Range::FreqInc,        Param::Range::FreqSkw },
-    { Param::ID::FreqModAmt,  Param::ID::FreqModAmt,  "",                0.25f, Param::Range::FreqModAmtMin,  Param::Range::FreqModAmtMax,  Param::Range::FreqModAmtInc,  Param::Range::FreqModAmtSkw },
-    { Param::ID::FreqModRate, Param::ID::FreqModRate, Param::Unit::Hz,   0.5f,  Param::Range::FreqModRateMin, Param::Range::FreqModRateMax, Param::Range::FreqModRateInc, Param::Range::FreqModRateSkw },
-    { Param::ID::Reso,        Param::Name::Reso,      "",                1.0f,  Param::Range::ResoMin,        Param::Range::ResoMax,        Param::Range::ResoInc,        Param::Range::ResoSkw },
-    { Param::ID::Mode,        Param::Name::Mode,      "",                0.0f,  Param::Range::ModeMin,        Param::Range::ModeMax,        Param::Range::ModeInc,        Param::Range::ModeSkw }
+    { Param::ID::Freq,        Param::Name::Freq,        Param::Unit::Hz, 500.0f,  Param::Range::FreqMin,        Param::Range::FreqMax,        Param::Range::FreqInc,        Param::Range::FreqSkw },
+    { Param::ID::FreqModAmt,  Param::Name::FreqModAmt,  "",                0.25f, Param::Range::FreqModAmtMin,  Param::Range::FreqModAmtMax,  Param::Range::FreqModAmtInc,  Param::Range::FreqModAmtSkw },
+    { Param::ID::FreqModRate, Param::Name::FreqModRate, Param::Unit::Hz,   0.5f,  Param::Range::FreqModRateMin, Param::Range::FreqModRateMax, Param::Range::FreqModRateInc, Param::Range::FreqModRateSkw },
+    { Param::ID::Reso,        Param::Name::Reso,        "",                1.0f,  Param::Range::ResoMin,        Param::Range::ResoMax,        Param::Range::ResoInc,        Param::Range::ResoSkw },
+    { Param::ID::Mode,        Param::Name::Mode,        "",                0.0f,  Param::Range::ModeMin,        Param::Range::ModeMax,        Param::Range::ModeInc,        Param::Range::ModeSkw }
 };
 
 SVFProcessor::SVFProcessor() :

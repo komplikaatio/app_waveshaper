@@ -71,8 +71,8 @@ private:
     float distortion { 0.f };
 
     static constexpr float WowFreqHz { 2.f };
-    static constexpr float WowDepthMax { 0.002f };
-    static constexpr float MaxChannels { 2 };
+    static constexpr float WowDepthMaxMs { 0.002f };
+    static constexpr unsigned int MaxChannels { 2 };
 };
 
 }

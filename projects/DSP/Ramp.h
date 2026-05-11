@@ -12,6 +12,8 @@ public:
     // Default ramp time of 50ms
     static constexpr F DefaultRampTime { static_cast<F>(0.05) };
 
+    static_assert(std::is_floating_point<F>::value, "Only supports floating point!");
+
     Ramp(F rampTimeSec) :
         rampTime { std::fmax(rampTimeSec, minRampTime) }
     { }

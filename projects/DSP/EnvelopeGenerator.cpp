@@ -129,26 +129,26 @@ void EnvelopeGenerator::doDigital(float* output, unsigned int numSamples)
                 currentEnvelope += (1.f - currentEnvelope) / std::fmax(static_cast<float>(attackTimeSamples - attackSamplesCounter), 1.f);
                 currentEnvelope = std::fmin(currentEnvelope, 1.f);
                 ++attackSamplesCounter;
+                break;
             }
             else
             {
                 attackSamplesCounter = 0;
                 state = DECAY;
             }
-            break;
 
         case DECAY:
             if (decaySamplesCounter < decayTimeSamples)
             {
                 currentEnvelope += (sustainLevel - currentEnvelope) / std::fmax(static_cast<float>(decayTimeSamples - decaySamplesCounter), 1.f);
                 ++decaySamplesCounter;
+                break;
             }
             else
             {
                 decaySamplesCounter = 0;
                 state = SUSTAIN;
             }
-            break;
 
         case SUSTAIN:
             {
@@ -160,11 +160,13 @@ void EnvelopeGenerator::doDigital(float* output, unsigned int numSamples)
             if (releaseSamplesCounter < releaseTimeSamples)
             {
                 currentEnvelope += (0.f - currentEnvelope) / std::fmax(static_cast<float>(releaseTimeSamples - releaseSamplesCounter), 1.f);
+                currentEnvelope = std::fmax(currentEnvelope, 0.f);
                 ++releaseSamplesCounter;
             }
             else
             {
                 releaseSamplesCounter = 0;
+                currentEnvelope = 0.f;
                 state = OFF;
             }
             break;
@@ -193,25 +195,25 @@ void EnvelopeGenerator::doAnalog(float* output, unsigned int numSamples)
             {
                 currentEnvelope = (currentEnvelope - 1.1f) * attackLeakyIntCoeff + 1.1f;
                 currentEnvelope = std::fmin(currentEnvelope, 1.f);
+                break;
             }
             else
             {
                 currentEnvelope = 1.f;
                 state = DECAY;
             }
-            break;
 
         case DECAY:
             if (std::fabs(currentEnvelope - sustainLevel) > delta)
             {
                 currentEnvelope = (currentEnvelope - sustainLevel) * decayLeakyIntCoeff + sustainLevel;
+                break;
             }
             else
             {
                 currentEnvelope = sustainLevel;
                 state = SUSTAIN;
             }
-            break;
 
         case SUSTAIN:
             {

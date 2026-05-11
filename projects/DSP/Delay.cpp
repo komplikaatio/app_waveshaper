@@ -37,7 +37,7 @@ void Delay::prepare(double newSampleRate, float maxTimeMs, unsigned int numChann
     preDistortionRamp.prepare(sampleRate, true, distortionLin);
     postDistortionRamp.prepare(sampleRate, true, 2.f / distortionLin);
     timeRamp.prepare(sampleRate, true, delayTimeMs * static_cast<float>(sampleRate * 0.001));
-    wowRamp.prepare(sampleRate, true, wow * WowDepthMax * static_cast<float>(sampleRate));
+    wowRamp.prepare(sampleRate, true, wow * WowDepthMaxMs * static_cast<float>(sampleRate));
     feedbackRamp.prepare(sampleRate, true, feedback * 0.98f);
 
     phaseState[0] = 0.f;
@@ -58,6 +58,8 @@ void Delay::clear()
 
 void Delay::process(float* const* output, const float* const* input, unsigned int numChannels, unsigned int numSamples)
 {
+    numChannels = std::min(numChannels, MaxChannels);
+
     for (unsigned int n = 0; n < numSamples; ++n)
     {
         // Process LFO acording to mod type
@@ -114,7 +116,7 @@ void Delay::setDelayTime(float newDelayMs)
 void Delay::setWow(float wowNorm)
 {
     wow = std::clamp(wowNorm, 0.f, 1.f);
-    wowRamp.setTarget(wow * WowDepthMax * static_cast<float>(sampleRate));
+    wowRamp.setTarget(wow * WowDepthMaxMs * static_cast<float>(sampleRate));
 }
 
 void Delay::setFeedback(float feedbackNorm)
