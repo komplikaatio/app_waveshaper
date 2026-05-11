@@ -33,6 +33,9 @@ set(dsp_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/DSP)
 # GUI directory helper variable
 set(gui_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/GUI)
 
+# MRTA framework helper variable
+set(mrta_source ${CMAKE_CURRENT_SOURCE_DIR}/mrta_utils)
+
 # Example project
 set(mfrtaa_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/MyFirstRealTimeAudioApp)
 
@@ -215,3 +218,24 @@ add_plugin(midi
     INCLUDE_DIRS
         ${dsp_source}
         ${midi_source})
+
+# Knob example project
+set(knob_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/KnobExample)
+
+juce_add_binary_data(knob_data
+    SOURCES ${knob_source}/knob.png)
+
+add_plugin(knob
+    VERSION 0.1.0
+    PLUGIN_NAME "Knob Example"
+    PROD_NAME KnobExample
+    PROD_CODE Knob
+    SYNTH FALSE
+    SOURCES
+        ${knob_source}/PluginEditor.cpp
+        ${knob_source}/PluginProcessor.cpp
+        ${mrta_source}/GUI/ImageKnob.cpp
+    INCLUDE_DIRS
+        ${knob_source}
+    LINK_LIBS
+        knob_data)
