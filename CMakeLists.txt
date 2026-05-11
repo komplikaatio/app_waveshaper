@@ -30,6 +30,9 @@ set(company_bundle_id "com.ModernRealTimeAudio")
 # DSP directory helper variable
 set(dsp_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/DSP)
 
+# GUI directory helper variable
+set(gui_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/GUI)
+
 # Example project
 set(mfrtaa_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/MyFirstRealTimeAudioApp)
 
@@ -133,6 +136,8 @@ add_plugin(delay
         ${dsp_source}/Delay.cpp
         ${dsp_source}/Biquad.cpp
         ${dsp_source}/ParametricEqualizer.cpp
+        ${dsp_source}/Meter.cpp
+        ${gui_source}/MeterComponent.cpp
     INCLUDE_DIRS
         ${dsp_source}
         ${gui_source}

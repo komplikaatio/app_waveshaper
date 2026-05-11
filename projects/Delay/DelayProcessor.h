@@ -3,6 +3,7 @@
 #include <BaseProcessor.h>
 
 #include <Delay.h>
+#include <Meter.h>
 
 namespace Param
 {
@@ -91,10 +92,14 @@ public:
     // Creates the GUI
     juce::AudioProcessorEditor* createEditor() override;
 
+    // Meter getter
+    DSP::Meter& getMeter() { return meter; }
+
 private:
     DSP::Delay delay;
     DSP::Ramp<float> wetRamp;
     DSP::Ramp<float> dryRamp;
+    DSP::Meter meter;
 
     float enabled { 1.f };
     float mix { 0.5f };
