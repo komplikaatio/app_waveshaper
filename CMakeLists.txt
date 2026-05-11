@@ -239,3 +239,23 @@ add_plugin(knob
         ${knob_source}
     LINK_LIBS
         knob_data)
+
+# Add "PhaseVocoder" plugin target
+set(pv_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/PhaseVocoder)
+
+add_plugin(PhaseVocoder
+    VERSION 0.0.1
+    SYNTH FALSE
+    PLUGIN_NAME "Phase Vocoder"
+    PROD_NAME "PhaseVocoder"
+    PROD_CODE "Phvc"
+    SYNTH FALSE
+    SOURCES
+        ${pv_source}/PhaseVocoderProcessor.cpp
+        ${pv_source}/PhaseVocoderEditor.cpp
+        ${dsp_source}/OverlapSave.cpp
+        ${dsp_source}/OverlapAdd.cpp
+        ${dsp_source}/Phase.cpp
+    INCLUDE_DIRS
+        ${dsp_source}
+        ${pv_source})
