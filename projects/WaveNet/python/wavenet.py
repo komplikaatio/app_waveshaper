@@ -130,7 +130,6 @@ class WaveNet(nn.Module):
         all_weights.append(conv_out_bias)
         all_weights = np.concatenate(all_weights)
         all_weights = all_weights.astype(np.float32)
-        import ipdb; ipdb.set_trace()
         all_weights.tofile(file_path)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
