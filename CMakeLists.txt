@@ -259,3 +259,25 @@ add_plugin(PhaseVocoder
     INCLUDE_DIRS
         ${dsp_source}
         ${pv_source})
+
+# Add "WaveNet" plugin target
+set(wavenet_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/WaveNet)
+
+juce_add_binary_data(wavenet_data
+    SOURCES
+        ${wavenet_source}/wavenet_weights.bin)
+
+add_plugin(WaveNet
+    VERSION 0.0.1
+    SYNTH FALSE
+    PLUGIN_NAME "WaveNet"
+    PROD_NAME "WaveNet"
+    PROD_CODE "WaNe"
+    SOURCES
+        ${wavenet_source}/WaveNetProcessor.cpp
+        ${wavenet_source}/WaveNetEditor.cpp
+    INCLUDE_DIRS
+        ${dsp_source}
+        ${wavenet_source}
+    LINK_LIBS
+        wavenet_data)
