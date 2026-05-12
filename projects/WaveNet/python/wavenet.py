@@ -113,14 +113,18 @@ class WaveNet(nn.Module):
         self.conv_out.detach_state()
 
     def store_to_binary(self, file_path: str = "wavenet_weights.bin"):
+        def conv_weight_cpp_flat(w: torch.Tensor) -> np.ndarray:
+            """PyTorch Conv1d weight (out, in, kernel) -> C++ layout [kernel][out][in] row-major."""
+            return np.transpose(w.cpu().detach().numpy(), (2, 0, 1)).flatten()
+
         all_weights = []
         all_weights.append(self.embedding_in.weight.cpu().detach().numpy().flatten())
         for i in range(self.num_layers):
-            conv_kernel = self.layers[i].conv.weight.cpu().detach().permute(2, 1, 0).numpy().flatten()
+            conv_kernel = conv_weight_cpp_flat(self.layers[i].conv.weight)
             conv_bias = self.layers[i].conv.bias.cpu().detach().numpy().flatten()
             all_weights.append(conv_kernel)
             all_weights.append(conv_bias)
-        conv_out_kernel = self.conv_out.conv.weight.cpu().permute(2, 1, 0).detach().numpy().flatten()
+        conv_out_kernel = conv_weight_cpp_flat(self.conv_out.conv.weight)
         conv_out_bias = self.conv_out.conv.bias.cpu().detach().numpy().flatten()
         all_weights.append(conv_out_kernel)
         all_weights.append(conv_out_bias)

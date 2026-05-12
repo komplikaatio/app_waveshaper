@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 #include <cstddef>
 #include <cmath>
 #include <random>
@@ -12,34 +13,52 @@ public:
 
     void sample(size_t & output_idx, float & output_value, const float * logits)
     {
-        float sum = 0.0f;
-
-        // Compute unnormalized distribution
-        for (size_t i = 0; i < NUM_VALUES; ++i)
+        // Match infer.py: argmax when temperature ~= 0; else softmax(logits / T) then sample.
+        if (temperature < 1e-8f)
         {
-            float value = std::exp(logits[i]) / temperature;
-            distribution[i] = value;
-            sum += value;
-        }
-
-        // Normalize
-        for (size_t i = 0; i < NUM_VALUES; ++i)
-        {
-            distribution[i] /= sum;
-        }
-
-        // --- Weighted sampling (CDF method) ---
-        float r = uniform_dist(rng); // random number in [0, 1)
-        float cumulative = 0.0f;
-
-        output_idx = 128; // Default to mid-point (silence) if something goes wrong
-        for (size_t i = 0; i < NUM_VALUES; ++i)
-        {
-            cumulative += distribution[i];
-            if (r <= cumulative)
+            output_idx = 0;
+            float maxLogit = logits[0];
+            for (size_t i = 1; i < NUM_VALUES; ++i)
             {
-                output_idx = i;
-                break;
+                if (logits[i] > maxLogit)
+                {
+                    maxLogit = logits[i];
+                    output_idx = i;
+                }
+            }
+        }
+        else
+        {
+            float maxLogit = logits[0];
+            for (size_t i = 1; i < NUM_VALUES; ++i)
+            {
+                maxLogit = std::max(maxLogit, logits[i]);
+            }
+
+            float sum = 0.0f;
+            for (size_t i = 0; i < NUM_VALUES; ++i)
+            {
+                distribution[i] = std::exp((logits[i] - maxLogit) / temperature);
+                sum += distribution[i];
+            }
+
+            for (size_t i = 0; i < NUM_VALUES; ++i)
+            {
+                distribution[i] /= sum;
+            }
+
+            float r = uniform_dist(rng);
+            float cumulative = 0.0f;
+
+            output_idx = 128;
+            for (size_t i = 0; i < NUM_VALUES; ++i)
+            {
+                cumulative += distribution[i];
+                if (r <= cumulative)
+                {
+                    output_idx = i;
+                    break;
+                }
             }
         }
         // Mu-Law decoding
