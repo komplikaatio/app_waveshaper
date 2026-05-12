@@ -65,8 +65,8 @@ def build_model(device: torch.device, dtype: torch.dtype) -> WaveNet:
     """Hyperparameters must match train.py."""
     return WaveNet(
         num_embeddings=NUM_CLASSES,
-        embedding_channels=128,
-        hidden_channels=128,
+        embedding_channels=32,
+        hidden_channels=32,
         layers_per_stack=10,
         num_stacks=3,
         kernel_size=3,

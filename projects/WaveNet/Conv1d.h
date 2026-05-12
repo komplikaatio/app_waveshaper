@@ -27,17 +27,21 @@ public:
     }
 
     // process one "sample"
+    // PyTorch nn.Conv1d is cross-correlation: weight[k] multiplies the input k*dilation to the
+    // *left* of weight[K-1]'s position. For streaming inference aligned to the current frame,
+    // weight[K-1] hits the current input and weight[0] the oldest sample in the receptive field.
     void forward(float * output, const float * input)
     {
         for (size_t i = 0; i < OUT_CHANNELS; ++i)
         {
+            output[i] = bias[i];
             for (size_t j = 0; j < IN_CHANNELS; j++)
             {
-                output[i] = weights[0][i][j] * input[j] + bias[i];
+                output[i] += weights[KERNEL_SIZE - 1][i][j] * input[j];
                 for (size_t k = 1; k < KERNEL_SIZE; ++k)
                 {
                     size_t read_ptr = (write_ptr + ring_buffer_length - k * dilation) % ring_buffer_length;
-                    output[i] += weights[k][i][j] * ring_buffer[read_ptr][j];
+                    output[i] += weights[KERNEL_SIZE - 1 - k][i][j] * ring_buffer[read_ptr][j];
                 }
             }
         }

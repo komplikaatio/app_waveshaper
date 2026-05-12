@@ -29,8 +29,8 @@ x = np.concatenate(x, axis=0)
 
 
 num_classes = 256
-embedding_channels = 64
-hidden_channels = 64
+embedding_channels = 32
+hidden_channels = 32
 layers_per_stack = 10
 num_stacks = 3
 

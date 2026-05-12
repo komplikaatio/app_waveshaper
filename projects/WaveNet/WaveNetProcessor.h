@@ -36,7 +36,7 @@ public:
 
 private:
     static const size_t NUM_EMBEDDINGS { 256 }; // 8-bit quantization
-    static const size_t HIDDEN_CHANNELS { 64 };
+    static const size_t HIDDEN_CHANNELS { 32 };
     static const size_t LAYERS_PER_STACK { 10 };
     static const size_t NUM_STACKS { 3 };
     static const size_t KERNEL_SIZE { 3 };
