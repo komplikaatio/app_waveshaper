@@ -9,9 +9,9 @@ static const std::vector<mrta::ParameterInfo> ParameterInfos
 };
 
 AmpModelProcessor::AmpModelProcessor() :
-    parameterManager(*this, ProjectInfo::projectName, ParameterInfos)
+    mrta::BaseProcessor(ParameterInfos)
 {
-    parameterManager.registerParameterCallback(Param::ID::Volume,
+    registerParameterCallback(Param::ID::Volume,
     [this] (float value, bool forced)
     {
         DBG(Param::Name::Volume + ": " + juce::String { value });
@@ -21,7 +21,7 @@ AmpModelProcessor::AmpModelProcessor() :
         else
             volume.setTargetValue(value * 0.8f);
     });
-    parameterManager.registerParameterCallback(Param::ID::Tone,
+    registerParameterCallback(Param::ID::Tone,
     [this] (float value, bool forced)
     {
         DBG(Param::Name::Tone + ": " + juce::String { value });
@@ -40,22 +40,20 @@ AmpModelProcessor::~AmpModelProcessor()
 {
 }
 
-void AmpModelProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
+void AmpModelProcessor::prepare(double newSampleRate, int samplesPerBlock)
 {
     juce::uint32 numChannels { static_cast<juce::uint32>(std::max(getMainBusNumInputChannels(), getMainBusNumOutputChannels())) };
-    volume.reset(sampleRate, 0.01f);
-    tone.reset(sampleRate, 0.01f);
-    parameterManager.updateParameters(true);
+    volume.reset(newSampleRate, 0.01f);
+    tone.reset(newSampleRate, 0.01f);
     nnInputBuffer.setSize(samplesPerBlock, INPUT_SIZE);
     nnOutputBuffer.setSize(samplesPerBlock, OUTPUT_SIZE);
     gru[0].reset_state();
     gru[1].reset_state();
 }
 
-void AmpModelProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& /*midiMessages*/)
+void AmpModelProcessor::process(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& /*midiMessages*/)
 {
     juce::ScopedNoDenormals noDenormals;
-    parameterManager.updateParameters();
 
     const float * const * nn_input_read_ptr = nnInputBuffer.getArrayOfReadPointers();
     const float * const * nn_output_read_ptr = nnOutputBuffer.getArrayOfReadPointers();
@@ -88,42 +86,9 @@ void AmpModelProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::Mid
     }
 }
 
-void AmpModelProcessor::releaseResources()
-{
-}
-
-void AmpModelProcessor::getStateInformation(juce::MemoryBlock& destData)
-{
-    parameterManager.getStateInformation(destData);
-}
-
-void AmpModelProcessor::setStateInformation(const void* data, int sizeInBytes)
-{
-    parameterManager.setStateInformation(data, sizeInBytes);
-}
-
 juce::AudioProcessorEditor* AmpModelProcessor::createEditor()
 {
     return new AmpModelProcessorEditor(*this);
 }
 
-//==============================================================================
-const juce::String AmpModelProcessor::getName() const { return JucePlugin_Name; }
-bool AmpModelProcessor::acceptsMidi() const { return false; }
-bool AmpModelProcessor::producesMidi() const { return false; }
-bool AmpModelProcessor::isMidiEffect() const { return false; }
-double AmpModelProcessor::getTailLengthSeconds() const { return 0.0; }
-int AmpModelProcessor::getNumPrograms() { return 1; }
-int AmpModelProcessor::getCurrentProgram() { return 0; }
-void AmpModelProcessor::setCurrentProgram (int) { }
-const juce::String AmpModelProcessor::getProgramName(int) { return {}; }
-void AmpModelProcessor::changeProgramName(int, const juce::String&) { }
-bool AmpModelProcessor::hasEditor() const { return true; }
-//==============================================================================
-
-//==============================================================================
-// This creates new instances of the plugin..
-juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
-{
-    return new AmpModelProcessor();
-}
+CREATE_PLUGIN(AmpModelProcessor)
