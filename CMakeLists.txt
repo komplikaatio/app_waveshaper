@@ -320,3 +320,22 @@ add_plugin(synth
         ${gui_source}
         ${dsp_source}
         ${synth})
+
+# Waveshaper project
+set(waveshaper ${CMAKE_CURRENT_SOURCE_DIR}/projects/Waveshaper)
+
+add_plugin(waveshaper
+    VERSION 0.1.0
+    PLUGIN_NAME "Waveshaper"
+    PROD_NAME Wshaper
+    PROD_CODE Wsha
+    SYNTH TRUE
+    SOURCES
+        ${waveshaper}/WaveshaperEditor.cpp
+        ${waveshaper}/WaveshaperProcessor.cpp
+        ${dsp_source}/EnvelopeGenerator.cpp
+        ${dsp_source}/StateVariableFilter.cpp
+    INCLUDE_DIRS
+        ${gui_source}
+        ${dsp_source}
+        ${waveshaper})
