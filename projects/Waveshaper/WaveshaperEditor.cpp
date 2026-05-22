@@ -1,5 +1,15 @@
 #include "WaveshaperEditor.h"
 
+/**
+ * ================================================
+ * 
+ *          MOCKUP FOR DEVELOPING.
+ *          MUST BE CHANGED FOR THE COPY
+ *          WHENEVER POSSIBLE
+ * 
+ *  ================================================
+ */
+
 // Width of the whole GUI
 static constexpr int WIDTH { 250 };
 
@@ -30,3 +40,13 @@ void WaveshaperEditor::resized()
 {
     paramEditor.setBounds(getLocalBounds());
 }
+
+/**
+ * ================================================
+ * 
+ *          MOCKUP FOR DEVELOPING.
+ *          MUST BE CHANGED FOR THE COPY
+ *          WHENEVER POSSIBLE
+ * 
+ *  ================================================
+ */

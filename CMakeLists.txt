@@ -329,12 +329,12 @@ add_plugin(waveshaper
     PLUGIN_NAME "Waveshaper"
     PROD_NAME Wshaper
     PROD_CODE Wsha
-    SYNTH TRUE
+    SYNTH FALSE
     SOURCES
         ${waveshaper}/WaveshaperEditor.cpp
         ${waveshaper}/WaveshaperProcessor.cpp
-        ${dsp_source}/EnvelopeGenerator.cpp
-        ${dsp_source}/StateVariableFilter.cpp
+        ${waveshaper}/XYPad.cpp
+        ${waveshaper}/WSLaf.cpp
     INCLUDE_DIRS
         ${gui_source}
         ${dsp_source}

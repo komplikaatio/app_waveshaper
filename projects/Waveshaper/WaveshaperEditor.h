@@ -4,6 +4,16 @@
 
 #include <GenericParameterEditor.h>
 
+/**
+ * ================================================
+ * 
+ *          MOCKUP FOR DEVELOPING.
+ *          MUST BE CHANGED FOR THE COPY
+ *          WHENEVER POSSIBLE
+ * 
+ *  ================================================
+ */
+
 class WaveshaperEditor final : public juce::AudioProcessorEditor
 {
 public:
@@ -20,3 +30,13 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WaveshaperEditor)
 };
+
+/**
+ * ================================================
+ * 
+ *          MOCKUP FOR DEVELOPING.
+ *          MUST BE CHANGED FOR THE COPY
+ *          WHENEVER POSSIBLE
+ * 
+ *  ================================================
+ */
