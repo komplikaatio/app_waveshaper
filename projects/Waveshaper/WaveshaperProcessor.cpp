@@ -5,17 +5,26 @@
 
 static const std::vector<mrta::ParameterInfo> parameters
 {
-    { Param::ID::Enabled,  Param::Name::Enabled,  Param::Ranges::EnabledOff, Param::Ranges::EnabledOn, true },
-    { Param::ID::Offset,   Param::Name::Offset,   Param::Units::Ms,  2.f,  Param::Ranges::OffsetMin,   Param::Ranges::OffsetMax,   Param::Ranges::OffsetInc,   Param::Ranges::OffsetSkw },
-    { Param::ID::Depth,    Param::Name::Depth,    Param::Units::Ms,  2.f,  Param::Ranges::DepthMin,    Param::Ranges::DepthMax,    Param::Ranges::DepthInc,    Param::Ranges::DepthSkw },
-    { Param::ID::Rate,     Param::Name::Rate,     Param::Units::Hz,  0.5f, Param::Ranges::RateMin,     Param::Ranges::RateMax,     Param::Ranges::RateInc,     Param::Ranges::RateSkw },
-    { Param::ID::ModType,  Param::Name::ModType,  Param::Ranges::ModLabels, 0 }
+    { Param::ID::Enabled,           Param::Name::Enabled,           Param::Ranges::EnabledOff,      Param::Ranges::EnabledOn, true },
+
+    { Param::ID::DryWet,            Param::Name::DryWet,            Param::Units::Percent,          Param::Ranges::DryWetDefault,
+      Param::Ranges::DryWetMin,     Param::Ranges::DryWetMax,       Param::Ranges::DryWetInc,       Param::Ranges::DryWetSkw },
+ 
+    { Param::ID::InputGain,         Param::Name::InputGain,         Param::Units::Db,               Param::Ranges::InputGainDefault,
+      Param::Ranges::InputGainMin,  Param::Ranges::InputGainMax,    Param::Ranges::InputGainInc,    Param::Ranges::InputGainSkw },
+ 
+    { Param::ID::OutputGain,        Param::Name::OutputGain,        Param::Units::Db,               Param::Ranges::OutputGainDefault,
+      Param::Ranges::OutputGainMin, Param::Ranges::OutputGainMax,   Param::Ranges::OutputGainInc,   Param::Ranges::OutputGainSkw },
 };
 
 WaveshaperProcessor::WaveshaperProcessor() :
     mrta::BaseProcessor(parameters),
     enableRamp(0.05f)
 {
+    for (int i = 0; i < NumPoints; ++i)
+    {
+        // Initializing each point
+    }
     registerParameterCallback(Param::ID::Enabled,
         [this](float newValue, bool force)
         {
