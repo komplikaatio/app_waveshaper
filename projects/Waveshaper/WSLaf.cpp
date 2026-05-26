@@ -21,6 +21,7 @@ void WSLaf::drawDocumentWindowBackground(
 }
 
 void WSLaf::drawDisplay(
+    juce::Graphics& g,
     juce::Rectangle<int> bounds,
     std::vector<double> x,
     std::vector<double> y

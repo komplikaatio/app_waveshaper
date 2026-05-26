@@ -2,100 +2,55 @@
 #include "WaveshaperProcessor.h"
 
 // Width of the whole GUI
-static constexpr int WIDTH { 400 };
+static constexpr int WIDTH { 600 };
 
 // Height of the whole GUI
-static constexpr int PARAM_HEIGHT { 300 };
+static constexpr int HEIGHT { 400 };
 
 WaveshaperEditor::WaveshaperEditor(mrta::BaseProcessor& p) :
     juce::AudioProcessorEditor(p),
-    processor { p },
-    paramEditor(, PARAM_HEIGHT)
+    processor   { p },
+    waveshaper  { p.getWaveshaper() },
+
+    // InitializeSliders
+    enabledButton   ( Param::ID::Enabled        , processor.getParameterManager().getAPVTS() ),
+    dryWetSlider    ( Param::ID::DryWet         , processor.getParameterManager().getAPVTS() ),
+    inputGainSlider ( Param::ID::InputGain      , processor.getParameterManager().getAPVTS() ),
+    outputGainSlider( Param::ID::OutputGain     , processor.getParameterManager().getAPVTS() ),
+    yLeftSlider     ( Param::ID::OutputGain     , processor.getParameterManager().getAPVTS() ),
+    yRightSlider    ( Param::ID::OutputGain     , processor.getParameterManager().getAPVTS() )
 {
-    // Get parameters
-    auto& parameterManager = processor.getParameterManager();
-    juce::AudioProcessorValueTreeState& apvts { parameterManager.getAPVTS() };
+    auto& apvts = processor.getParameterManager().getAPVTS();
 
-    // Copy the parameters vector
-    const std::vector<mrta::ParameterInfo>& originalParameters { parameterManager.getParameters() };
-    std::vector<mrta::ParameterInfo> parameters;
+    // Set button text
+    enabledButton.setButtonText(Param::Name::Enabled);
 
-    if (parameterIDs.size())
+    // Initialize points
+    for (auto pointIdx = 0; pointIdx < DSP::WaveShaper::WS_POINTS)
     {
-        for (const mrta::ParameterInfo& pi : originalParameters)
-            if (parameterIDs.contains(pi.ID))
-                parameters.push_back(pi);
-    }
-    else
-    {
-        for (const mrta::ParameterInfo& pi : originalParameters)
-            parameters.push_back(pi);
-    }
-
-    // Initialize sliders
-
-    // Enabled
-    auto enabledParam = *std::find_if(parameters.begin(), parameters.end(), 
-        [](const Person& p) { return p.ID == Param::ID::Enabled; });
-    enabledButton = std::make_unique<mrta::ParameterButton>(
-        enabledParam.ID
-        apvts
-    );
-    addAndMakeVisible(*enabledButton);
-
-    // Dry / Wet
-    auto dryWetParam = *std::find_if(parameters.begin(), parameters.end(), 
-        [](const Person& p) { return p.ID == Param::ID::DryWet; });
-    dryWetSlider = std::make_unique<mrta::ParameterSlider>(
-        dryWetParam.ID
-        apvts
-    );
-    dryWetSlider->setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
-    addAndMakeVisible(*dryWetSlider);
-
-    // Input gain
-    auto inputGainParam = *std::find_if(parameters.begin(), parameters.end(), 
-        [](const Person& p) { return p.ID == Param::ID::InputGain; });
-    inputGainSlider = std::make_unique<mrta::ParameterSlider>(
-        inputGainParam.ID
-        apvts
-    );
-    inputGainSlider->setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
-    addAndMakeVisible(*inputGainSlider);
-
-    // Output gain
-    auto outputGainParam = *std::find_if(parameters.begin(), parameters.end(), 
-        [](const Person& p) { return p.ID == Param::ID::OutputGain; });
-    outputGainSlider = std::make_unique<mrta::ParameterSlider>(
-        outputGainParam.ID
-        apvts
-    );
-    outputGainSlider->setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
-    addAndMakeVisible(*outputGainSlider);
-
-    // Points sliders
-
-    // TODO: Populate slider vectors. Need to know how the IDs of these work
-
-    for (auto& xSlider : pointXSliders)
-    {
-        xSlider->setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
-        addAndMakeVisible(*xSlider);
-    }
-
-    for (auto& ySlider : pointYSliders)
-    {
-        ySlider->setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
-        addAndMakeVisible(*ySlider);
-    }
-
-    // Display
-    for (auto pointIdx = 0; pointIdx < numPoints; ++pointIdx)
-    {
-        pads.push_back({
-            *xSliders[pointIdx],
-            *ySliders[pointIdx]
+        pointComponents.push_back({
+            pointIdx,
+            apvts,
+            waveshaper
         });
+    }
+
+    // Set sliders style
+    dryWetSlider    .setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
+    inputGainSlider .setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
+    outputGainSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
+    yLeftSlider     .setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
+    yRightSlider    .setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
+
+    // Add components
+    addAndMakeVisible(dryWetSlider);
+    addAndMakeVisible(inputGainSlider);
+    addAndMakeVisible(outputGainSlider);
+    addAndMakeVisible(yLeftSlider);
+    addAndMakeVisible(yRightSlider);
+    for (auto& point : pointComponents)
+    {
+        addAndMakeVisible(point);
     }
 
     // Set window size

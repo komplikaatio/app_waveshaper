@@ -14,7 +14,7 @@
 static constexpr int WIDTH { 250 };
 
 // Height of each paramter knob on the paramEditor
-static const int PARAM_HEIGHT { 100 };
+static const int PARAM_HEIGHT { 10 };
 
 WaveshaperEditor::WaveshaperEditor(mrta::BaseProcessor& p) :
     juce::AudioProcessorEditor(p),

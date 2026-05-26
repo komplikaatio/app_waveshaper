@@ -10,6 +10,7 @@ public:
         juce::Rectangle<int> bounds
     );
     virtual void drawDisplay(
+        juce::Graphics& g,
         juce::Rectangle<int> bounds,
         std::vector<double> x,
         std::vector<double> y
@@ -45,9 +46,9 @@ public:
 
 private:
 
-    static const juce::Colour COLOUR_0 { 0xfff1faee };
-    static const juce::Colour COLOUR_1 { 0xffa8dadc };
-    static const juce::Colour COLOUR_2 { 0xff457b9d };
-    static const juce::Colour COLOUR_3 { 0xff1d3557 };
-    static const juce::Colour COLOUR_4 { 0xffe63946 };
+    inline static const juce::Colour COLOUR_0 { 0xfff1faee };
+    inline static const juce::Colour COLOUR_1 { 0xffa8dadc };
+    inline static const juce::Colour COLOUR_2 { 0xff457b9d };
+    inline static const juce::Colour COLOUR_3 { 0xff1d3557 };
+    inline static const juce::Colour COLOUR_4 { 0xffe63946 };
 };

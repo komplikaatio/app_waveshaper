@@ -333,8 +333,9 @@ add_plugin(waveshaper
     SOURCES
         ${waveshaper}/WaveshaperEditor.cpp
         ${waveshaper}/WaveshaperProcessor.cpp
-        ${waveshaper}/XYPad.cpp
-        ${waveshaper}/WSLaf.cpp
+        #${waveshaper}/XYPad.cpp
+        #${waveshaper}/WSLaf.cpp
+        ${dsp_source}/Waveshaper.cpp
     INCLUDE_DIRS
         ${gui_source}
         ${dsp_source}

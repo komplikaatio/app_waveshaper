@@ -1,0 +1,215 @@
+#include "Waveshaper.h"
+#include <cassert>
+
+namespace DSP
+{
+
+Waveshaper::Waveshaper()
+{
+    // Set fixed end Y-only points
+    points[0].x = X_MIN;
+    points[0].y = Y_MIN;
+    points[WS_POINTS + 1].x = X_MAX;
+    points[WS_POINTS + 1].y = Y_MAX;
+}
+
+void Waveshaper::prepare(double newSampleRate)
+{
+    for (auto& point : points)
+    {
+        point.xRamp         .prepare(newSampleRate);
+        point.yRamp         .prepare(newSampleRate);
+        point.xRandomRamp   .prepare(newSampleRate);
+        point.yRandomRamp   .prepare(newSampleRate);
+    }
+}
+
+void Waveshaper::process(juce::AudioBuffer<float> &buffer)
+{
+    for (auto sampleIdx = 0; sampleIdx < buffer.getNumSamples(); ++sampleIdx)
+    {
+        for (auto chIdx = 0; chIdx < buffer.getNumChannels(); ++chIdx)
+        {
+            // Get input sample
+            auto inputSample = buffer.getSample(chIdx, sampleIdx);
+
+            // Process
+            auto outputSample = applyWaveshaping(inputSample);
+
+            // Replace
+            buffer.setSample(chIdx, sampleIdx, outputSample);
+        }
+        step();
+    }
+    updateCurrentPositions();
+}
+
+
+void Waveshaper::setX(size_t pointIdx, float newValue)
+{
+    assert(pointIdx < WS_POINTS);
+
+    // Expect normalized value
+    assert(newValue <= 1.0f);
+    assert(newValue >= 0.f);
+
+    // Scale to point´s range
+    newValue = SizeX * pointIdx + newValue * SizeX;
+
+    // Here we are in range [0.0, 2.0]
+
+    // Scale to [-1.0, 1.0]
+    newValue -= 1.f;
+
+    // Center within its bin
+    newValue += SizeX * 0.5f;
+
+    getPoint(pointIdx).xRamp.setTarget(newValue);
+}
+
+void Waveshaper::setY(size_t pointIdx, float newValue)
+{
+    assert(pointIdx < WS_POINTS);
+
+    // Expect value in range [-1.0, 1.0]
+    assert(newValue <= Y_MAX);
+    assert(newValue >= Y_MIN);
+
+    getPoint(pointIdx).yRamp.setTarget(newValue);
+}
+
+void Waveshaper::setXRandomRange(size_t pointIdx, float newValue)
+{
+    assert(pointIdx < WS_POINTS);
+
+    // Expect normalized value
+    assert(newValue <= 1.0f);
+    assert(newValue >= 0.f);
+
+    // Scale to point´s range size
+    newValue = newValue * SizeX * 0.5f;
+
+    auto min = -newValue;
+    auto max = newValue;
+
+    getPoint(pointIdx).xRandomRamp.setRange(min, max); 
+}
+
+void Waveshaper::setYRandomRange(size_t pointIdx, float newValue)
+{
+    assert(pointIdx < WS_POINTS);
+
+    // Expect normalized value
+    assert(newValue <= 1.0f);
+    assert(newValue >= 0.f);
+
+    auto min = -newValue;
+    auto max = newValue;
+
+    getPoint(pointIdx).yRandomRamp.setRange(min, max);
+}
+
+void Waveshaper::setXRandomRate(size_t pointIdx, float newValueMs)
+{
+    assert(pointIdx < WS_POINTS);
+    assert(newValueMs >= 0);
+
+    getPoint(pointIdx).xRandomRamp.setRampTime(newValueMs * 0.001f);
+}
+
+void Waveshaper::setYRandomRate(size_t pointIdx, float newValueMs)
+{
+    assert(pointIdx < WS_POINTS);
+    assert(newValueMs >= 0);
+
+    getPoint(pointIdx).yRandomRamp.setRampTime(newValueMs * 0.001f);
+}
+
+void Waveshaper::setLeftY(float newValue)
+{
+    assert(newValue >= Y_MIN);
+    assert(newValue <= Y_MAX);
+
+    points[0].yRamp.setTarget(newValue);
+}
+
+void Waveshaper::setRightY(float newValue)
+{
+    assert(newValue >= Y_MIN);
+    assert(newValue <= Y_MAX);
+
+    points[WS_POINTS].yRamp.setTarget(newValue);
+}
+
+float Waveshaper::getCurrentX(size_t pointIdx)
+{
+    assert(pointIdx < WS_POINTS);
+    return currentXs[pointIdx].load();
+}
+
+float Waveshaper::getCurrentY(size_t pointIdx)
+{
+    assert(pointIdx < WS_POINTS);
+    return currentYs[pointIdx].load();
+}
+
+float Waveshaper::applyWaveshaping(float inputSample)
+{
+    // Find within which pair of points falls inputSample (first shift to range [0, 2])
+    auto segmentIdx = static_cast<size_t>((inputSample + 1.f) * SizeXInv)
+
+    // Corner case inputSample = 1.0
+    segmentIdx -= segmentIdx == WS_POINTS;
+
+    // Array padding keeps us safe
+    auto* pointA = &points[segmentIdx];
+    auto* pointB = &points[segmentIdx + 1];
+    if(inputSample < pointA->x)
+    {
+        pointA = &points[segmentIdx - 1];
+        pointB = &points[segmentIdx];
+    }
+
+    // Interpolate and apply waveshaping function
+    const auto prop = (inputSample - pointA->x) / (pointB->x - pointA->x);
+    const auto outputSample = (1.f - prop) * pointA->y + prop * pointB->y;
+
+    return outputSample;
+}
+
+void Waveshaper::step()
+{
+    // Step ramps and calculates new point positions
+    for (auto pointIdx = 0; pointIdx < WS_POINTS; ++pointIdx)
+    {
+        auto& point = getPoint(pointIdx);
+        auto x          = point.xRamp       .getNext();
+        auto xRandom    = point.xRandomRamp .getNext();
+        auto y          = point.yRamp       .getNext();
+        auto yRandom    = point.yRandomRamp .getNext();
+
+        point.x = std::clamp(x + xRandom, X_MIN, X_MAX);
+        point.y = std::clamp(y + yRandom, Y_MIN, Y_MAX);
+    }
+
+    // Set ends
+    points[0]           .y = points[0]           .yRamp.getNext();
+    points[WS_POINTS+1] .y = points[WS_POINTS+1] .yRamp.getNext();
+}
+
+void Waveshaper::updateCurrentPositions()
+{
+    for(auto pointIdx = 0; pointIdx < WS_POINTS; ++pointIdx)
+    {
+        auto& point = points[pointIdx + 1];
+        currentXs[pointIdx].store(point.x);
+        currentYs[pointIdx].store(point.y);
+    }
+}
+
+Waveshaper::Point &Waveshaper::getPoint(size_t pointIdx)
+{
+    // Take padding into account
+    return points[pointIdx + 1];
+}
+}
