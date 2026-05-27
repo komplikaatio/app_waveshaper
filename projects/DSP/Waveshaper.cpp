@@ -61,9 +61,6 @@ void Waveshaper::setX(size_t pointIdx, float newValue)
     // Scale to [-1.0, 1.0]
     newValue -= 1.f;
 
-    // Center within its bin
-    newValue += SizeX * 0.5f;
-
     getPoint(pointIdx).xRamp.setTarget(newValue);
 }
 
@@ -138,7 +135,7 @@ void Waveshaper::setRightY(float newValue)
     assert(newValue >= Y_MIN);
     assert(newValue <= Y_MAX);
 
-    points[WS_POINTS].yRamp.setTarget(newValue);
+    points[WS_POINTS + 1].yRamp.setTarget(newValue);
 }
 
 float Waveshaper::getCurrentX(size_t pointIdx)
@@ -156,23 +153,42 @@ float Waveshaper::getCurrentY(size_t pointIdx)
 float Waveshaper::applyWaveshaping(float inputSample)
 {
     // Find within which pair of points falls inputSample (first shift to range [0, 2])
-    auto segmentIdx = static_cast<size_t>((inputSample + 1.f) * SizeXInv)
+    auto regionIdx = static_cast<size_t>((inputSample + 1.f) * SizeXInv);
 
     // Corner case inputSample = 1.0
-    segmentIdx -= segmentIdx == WS_POINTS;
+    regionIdx -= regionIdx == WS_POINTS;
 
     // Array padding keeps us safe
-    auto* pointA = &points[segmentIdx];
-    auto* pointB = &points[segmentIdx + 1];
+    auto* pointA = &getPoint(regionIdx);
+    auto* pointB = &getPoint(regionIdx + 1);
     if(inputSample < pointA->x)
     {
-        pointA = &points[segmentIdx - 1];
-        pointB = &points[segmentIdx];
+        pointA = &getPoint(regionIdx - 1);
+        pointB = &getPoint(regionIdx);
     }
 
     // Interpolate and apply waveshaping function
+    /*
     const auto prop = (inputSample - pointA->x) / (pointB->x - pointA->x);
     const auto outputSample = (1.f - prop) * pointA->y + prop * pointB->y;
+    */
+    // Catmull-Rom: pull in the two outer neighbours (padding ensures validity)
+    const float y0 = (pointA - 1)->y;
+    const float y1 = pointA->y;
+    const float y2 = pointB->y;
+    const float y3 = (pointB + 1)->y;
+
+    // Evaluate cubic Hermite basis
+    const float t  = (inputSample - pointA->x) / (pointB->x - pointA->x);
+    const float t2 = t  * t;
+    const float t3 = t2 * t;
+
+    const float outputSample = 0.5f * (
+        (-t3 + 2.f*t2 -        t) * y0 +
+        ( 3.f*t3 - 5.f*t2 + 2.f) * y1 +
+        (-3.f*t3 + 4.f*t2 +    t) * y2 +
+        (       t3 - t2          ) * y3
+    );
 
     return outputSample;
 }
@@ -201,7 +217,7 @@ void Waveshaper::updateCurrentPositions()
 {
     for(auto pointIdx = 0; pointIdx < WS_POINTS; ++pointIdx)
     {
-        auto& point = points[pointIdx + 1];
+        auto& point = getPoint(pointIdx);
         currentXs[pointIdx].store(point.x);
         currentYs[pointIdx].store(point.y);
     }

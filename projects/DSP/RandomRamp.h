@@ -67,97 +67,7 @@ public:
     // Set new Random time
     void setRampTime(F newRampTimeSec)
     {
-        rampTime = std::fmax(newRampTimeSec, 0.f);
-    }
-
-    // Apply summing RandomRamp to a single sample in-place
-    void applySum(F* buffers, unsigned int numChannels)
-    {
-        const F targetDelta { std::fabs(targetValue - currentValue) };
-        if ((targetDelta > std::fabs(static_cast<F>(2) * rampStep)) && (std::fabs(rampStep) > minDelta))
-            currentValue += rampStep;
-        else
-            currentValue = targetValue;
-
-        for (unsigned int ch = 0; ch < numChannels; ++ch)
-            buffers[ch] += currentValue;
-    }
-
-    // Apply summing RandomRamp to an audio buffer in-place
-    void applySum(F* const* buffers, unsigned int numChannels, unsigned int numSamples)
-    {
-        for (unsigned int n = 0; n < numSamples; ++n)
-        {
-            const F targetDelta { std::fabs(targetValue - currentValue) };
-            if ((targetDelta > std::fabs(static_cast<F>(2) * rampStep)) && (std::fabs(rampStep) > minDelta))
-                currentValue += rampStep;
-            else
-                currentValue = targetValue;
-
-            for (unsigned int ch = 0; ch < numChannels; ++ch)
-                buffers[ch][n] += currentValue;
-        }
-    }
-
-    // Apply summing RandomRamp to an audio buffer out-of-place
-    void applySum(F* const* output, const F* const* input, unsigned int numChannels, unsigned int numSamples)
-    {
-        for (unsigned int n = 0; n < numSamples; ++n)
-        {
-            const F targetDelta { std::fabs(targetValue - currentValue) };
-            if ((targetDelta > std::fabs(static_cast<F>(2) * rampStep)) && (std::fabs(rampStep) > minDelta))
-                currentValue += rampStep;
-            else
-                currentValue = targetValue;
-
-            for (unsigned int ch = 0; ch < numChannels; ++ch)
-                output[ch][n] = currentValue + input[ch][n];
-        }
-    }
-
-    // Apply gain RandomRamp to an audio buffer in-place for single sample
-    void applyGain(F* buffers, unsigned int numChannels)
-    {
-        const F targetDelta { std::fabs(targetValue - currentValue) };
-        if ((targetDelta > std::fabs(static_cast<F>(2) * rampStep)) && (std::fabs(rampStep) > minDelta))
-            currentValue += rampStep;
-        else
-            currentValue = targetValue;
-
-        for (unsigned int ch = 0; ch < numChannels; ++ch)
-            buffers[ch] *= currentValue;
-    }
-
-    // Apply gain RandomRamp to an audio buffer in-place
-    void applyGain(F* const* buffers, unsigned int numChannels, unsigned int numSamples)
-    {
-        for (unsigned int n = 0; n < numSamples; ++n)
-        {
-            const F targetDelta { std::fabs(targetValue - currentValue) };
-            if ((targetDelta > std::fabs(static_cast<F>(2) * rampStep)) && (std::fabs(rampStep) > minDelta))
-                currentValue += rampStep;
-            else
-                currentValue = targetValue;
-
-            for (unsigned int ch = 0; ch < numChannels; ++ch)
-                buffers[ch][n] *= currentValue;
-        }
-    }
-
-    // Apply gain RandomRamp to an audio buffer out-of-place
-    void applyGain(F* const* output, const F* const* input, unsigned int numChannels, unsigned int numSamples)
-    {
-        for (unsigned int n = 0; n < numSamples; ++n)
-        {
-            const F targetDelta{ std::fabs(targetValue - currentValue) };
-            if ((targetDelta > std::fabs(static_cast<F>(2) * rampStep)) && (std::fabs(rampStep) > minDelta))
-                currentValue += rampStep;
-            else
-                currentValue = targetValue;
-
-            for (unsigned int ch = 0; ch < numChannels; ++ch)
-                output[ch][n] = currentValue * input[ch][n];
-        }
+        rampTime = std::fmax(newRampTimeSec, minRampTime);
     }
 
     float getNext()
@@ -170,7 +80,7 @@ public:
             currentValue = targetValue;
 
             // Generate new random target
-            targetValue = randomDist(gen) * (min - max) + min;
+            setTarget(randomDist(gen) * (max - min) + min);
         }
 
         return currentValue;

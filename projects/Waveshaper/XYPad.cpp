@@ -11,23 +11,11 @@ XYPad::XYPad(juce::Slider& sliderX, juce::Slider& sliderY)
 
 void XYPad::paint(juce::Graphics& g)
 {
-    auto bounds = getLocalBounds().toFloat();
-
-    // Map slider values to pixel position
-    float px = juce::jmap((float)xSlider.getValue(),
-                            (float)xSlider.getMinimum(),
-                            (float)xSlider.getMaximum(),
-                            bounds.getX(), bounds.getRight());
-
-    float py = juce::jmap((float)ySlider.getValue(),
-                            (float)ySlider.getMinimum(),
-                            (float)ySlider.getMaximum(),
-                            bounds.getBottom(), bounds.getY()); // Y is flipped
-
-    // Draw the point
-    constexpr float radius = 5.0f;
-    g.setColour(juce::Colours::white);
-    g.fillEllipse(px - radius, py - radius, radius * 2.0f, radius * 2.0f);
+    if (hover)
+    {
+        g.setColour(juce::Colour(0x05ffffff));
+        g.fillRect(getLocalBounds());
+    }
 }
 
 void XYPad::mouseDown(const juce::MouseEvent& e)
@@ -39,6 +27,18 @@ void XYPad::mouseDown(const juce::MouseEvent& e)
 void XYPad::mouseDrag(const juce::MouseEvent& e)
 {
     updateFromMouse(e.position);
+}
+
+void XYPad::mouseEnter(const juce::MouseEvent &event)
+{
+    hover = true;
+    repaint();
+}
+
+void XYPad::mouseExit(const juce::MouseEvent &event)
+{
+    hover = false;
+    repaint();
 }
 
 void XYPad::updateFromMouse(juce::Point<float> pos)
@@ -62,6 +62,4 @@ void XYPad::updateFromMouse(juce::Point<float> pos)
 
     xSlider.setValue(newX, juce::sendNotificationSync);
     ySlider.setValue(newY, juce::sendNotificationSync);
-
-    repaint();
 }

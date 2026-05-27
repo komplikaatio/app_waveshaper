@@ -72,11 +72,12 @@ namespace Param
         static constexpr float PointXInc        { 0.001f };
         static constexpr float PointXSkw        { 1.f };
         static constexpr float PointXDef        { 0.5f };
-
+        
         static constexpr float PointYMin        { -1.f };
         static constexpr float PointYMax        { 1.f };
         static constexpr float PointYInc        { 0.001f };
         static constexpr float PointYSkw        { 1.f };
+        inline const     float pointYDef        (int i, int N) { return static_cast<float>(i + 1) / (N + 1) * 2.f - 1.f; }
 
         static constexpr float PointRangeMin    { 0.f };
         static constexpr float PointRangeMax    { 1.f };
@@ -84,14 +85,14 @@ namespace Param
         static constexpr float PointRangeSkw    { 0.5f };
         static constexpr float PointRangeDef    { 0.f };
 
-        static constexpr float PointRateMin     { 0.1f };
+        static constexpr float PointRateMin     { 1.f };
         static constexpr float PointRateMax     { 2000.f };
         static constexpr float PointRateInc     { 0.1f };
         static constexpr float PointRateSkw     { 0.3f };
         static constexpr float PointRateDef     { 250.f };
 
         static constexpr float LeftYDef         { -1.f };
-        static constexpr float RightYDef        { -1.f };
+        static constexpr float RightYDef        { 1.f };
     }
 
     namespace Units
@@ -119,6 +120,8 @@ public:
 
     // Creates the GUI
     juce::AudioProcessorEditor* createEditor() override;
+
+    DSP::Waveshaper& getWaveshaper();
 
 private:
 

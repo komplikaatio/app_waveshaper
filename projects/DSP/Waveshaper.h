@@ -19,7 +19,7 @@ public:
         RandomRamp<float> xRandomRamp   { 0.01f };
         RandomRamp<float> yRandomRamp   { 0.01f };
     };
-    static constexpr size_t WS_POINTS   { 8 };
+    static constexpr size_t WS_POINTS   { 7 }; // Good to use odd number so one point sits at x = 0.0 (DC)
     static constexpr float  X_MIN       { -1.f };
     static constexpr float  X_MAX       { 1.f };
     static constexpr float  Y_MIN       { -1.f };

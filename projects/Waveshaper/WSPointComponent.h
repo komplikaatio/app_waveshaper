@@ -2,6 +2,7 @@
 
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <juce_audio_processors/juce_audio_processors.h>
+#include <ParameterComponents.h>
 #include <Waveshaper.h>
 
 class WSPointComponent : public juce::Component
@@ -16,8 +17,11 @@ public:
     void paint (juce::Graphics& g) override;
     void resized() override;
 
+    mrta::ParameterSlider& getXSlider();
+    mrta::ParameterSlider& getYSlider();
+
 private:
-    size_t pointIdx,
+    size_t pointIdx;
     DSP::Waveshaper& waveshaper;
 
     mrta::ParameterSlider xSlider;

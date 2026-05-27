@@ -13,12 +13,16 @@ public:
 
     void mouseDown(const juce::MouseEvent& e) override;
     void mouseDrag(const juce::MouseEvent& e) override;
+    void mouseEnter(const juce::MouseEvent &event) override;
+    void mouseExit(const juce::MouseEvent &event) override;
 
 private:
     void updateFromMouse(juce::Point<float> pos);
 
     juce::Slider& xSlider;
     juce::Slider& ySlider;
+
+    bool hover { false };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(XYPad)
 };

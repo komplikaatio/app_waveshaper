@@ -30,9 +30,6 @@ static const std::vector<mrta::ParameterInfo> parameters = []()
 
     for (int i = 0; i < N; ++i)
     {
-        // X defaults evenly spaced 0..1; adjust if your points have bespoke defaults
-        const float xDef = static_cast<float>(i) / static_cast<float>(N - 1);
-
         p.push_back({ Param::ID::pointX(i),      Param::Name::pointX(i),      "", Param::Ranges::PointXDef,
                       Param::Ranges::PointXMin, Param::Ranges::PointXMax, Param::Ranges::PointXInc, Param::Ranges::PointXSkw });
 
@@ -42,7 +39,7 @@ static const std::vector<mrta::ParameterInfo> parameters = []()
         p.push_back({ Param::ID::pointXRate(i),  Param::Name::pointXRate(i),  "", Param::Ranges::PointRateDef,
                       Param::Ranges::PointRateMin, Param::Ranges::PointRateMax, Param::Ranges::PointRateInc, Param::Ranges::PointRateSkw });
 
-        p.push_back({ Param::ID::pointY(i),      Param::Name::pointY(i),      "", static_cast<float>(i + 1) / (N + 1) * 2.f - 1.f,
+        p.push_back({ Param::ID::pointY(i),      Param::Name::pointY(i),      "", Param::Ranges::pointYDef(i, N),
                       Param::Ranges::PointYMin, Param::Ranges::PointYMax, Param::Ranges::PointYInc, Param::Ranges::PointYSkw });
 
         p.push_back({ Param::ID::pointYRange(i), Param::Name::pointYRange(i), "", Param::Ranges::PointRangeDef,
@@ -184,6 +181,11 @@ void WaveshaperProcessor::process(juce::AudioBuffer<float>& buffer, juce::MidiBu
 juce::AudioProcessorEditor* WaveshaperProcessor::createEditor()
 {
     return new WaveshaperEditor(*this);
+}
+
+DSP::Waveshaper& WaveshaperProcessor::getWaveshaper()
+{
+    return waveshaper;
 }
 
 CREATE_PLUGIN(WaveshaperProcessor)

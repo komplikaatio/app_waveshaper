@@ -1,14 +1,14 @@
 #include "WSLaf.h"
+#include <cassert>
 
 void WSLaf::drawDocumentWindowBackground(
     juce::Graphics& g,
     juce::Rectangle<int> bounds
 )
 {
-    /*
     // Create a linear gradient between the first two colors
     juce::ColourGradient gradient (COLOUR_0, 0.0f, 0.0f, 
-                                   COLOUR_1, (float)bounds.getWidth(), 0.0f, false);
+                                    COLOUR_0, 0.0f, (float)bounds.getHeight(), false);
 
     // Add the third color at the 50% mark (0.5 proportion)
     gradient.addColour (0.5, COLOUR_0);
@@ -16,117 +16,244 @@ void WSLaf::drawDocumentWindowBackground(
     // Apply the gradient and fill the area
     g.setGradientFill (gradient);
     g.fillRect (bounds.toFloat());
-    */
-   g.fillAll(COLOUR_0);
 }
 
 void WSLaf::drawDisplay(
-    juce::Graphics& g,
+    juce::Graphics & g,
     juce::Rectangle<int> bounds,
-    std::vector<double> x,
-    std::vector<double> y
+    std::vector<float> xPos,
+    std::vector<float> yPos,
+    float yLeft,
+    float yRight
 )
 {
-    const float bX = (float)bounds.getX();
-    const float bY = (float)bounds.getY();
-    const float bW = (float)bounds.getWidth();
-    const float bH = (float)bounds.getHeight();
+    assert(xPos.size() == yPos.size());
 
-    // Map a value in [-1, 1] to a pixel X coordinate
-    auto toPixelX = [&](double v) {
-        return bX + (float)juce::jmap(v, -1.0, 1.0, 0.0, (double)bW);
-    };
-    // Map a value in [-1, 1] to a pixel Y coordinate (flipped: +1 = top)
-    auto toPixelY = [&](double v) {
-        return bY + (float)juce::jmap(v, -1.0, 1.0, (double)bH, 0.0);
-    };
-
-    // -------------------------------------------------------------------------
-    // Background
-    // -------------------------------------------------------------------------
-    g.setColour(COLOUR_3);
+    g.setColour(COLOUR_1);
     g.fillRect(bounds);
 
-    // -------------------------------------------------------------------------
-    // Grid lines
-    // -------------------------------------------------------------------------
-    const std::vector<double> majorLines  = { -1.0, -0.5, 0.0, 0.5, 1.0 };
-    const std::vector<double> minorLines  = { -0.75, -0.25, 0.25, 0.75 };
-    const float               labelHeight = 12.f;
-    const juce::Font          labelFont   (juce::FontOptions(labelHeight));
+    const auto numPoints    = xPos.size();
+    const auto pointRadius  = 5.f;
+    const auto height       = bounds.getHeight();
+    const auto width        = bounds.getWidth();
+    const auto pointWidth   = width / numPoints;
+    const auto thickness    = 2.f;
+    const auto gridThickness= 0.5f;
 
-    // --- Minor grid lines (subtle, no labels) --------------------------------
-    g.setColour(COLOUR_2.withAlpha(0.35f));
-    for (double v : minorLines)
+    // Draw  grid lines
+    juce::Path gridLines;
+    // Vertical lines
+    for (auto pointIdx = 0; pointIdx <= numPoints; ++pointIdx)
     {
-        // vertical
-        float px = toPixelX(v);
-        g.drawLine(px, bY, px, bY + bH, 0.5f);
-
-        // horizontal
-        float py = toPixelY(v);
-        g.drawLine(bX, py, bX + bW, py, 0.5f);
+        auto x = bounds.getX() + pointWidth * pointIdx;
+        gridLines.startNewSubPath(x, bounds.getY());
+        gridLines.lineTo(x, bounds.getY() + height);
     }
 
-    // --- Major grid lines + labels -------------------------------------------
-    for (double v : majorLines)
-    {
-        const bool  isCenter = (v == 0.0);
-        const float thickness = isCenter ? 1.5f : 0.75f;
-        g.setColour(COLOUR_2.withAlpha(isCenter ? 0.9f : 0.55f));
+    // Middle vertical line
+    gridLines.startNewSubPath(bounds.getX() + width * 0.5f, bounds.getY());
+    gridLines.lineTo(bounds.getX() + width * 0.5f, bounds.getY() + height);
 
-        // Vertical line
-        float px = toPixelX(v);
-        g.drawLine(px, bY, px, bY + bH, thickness);
+    // Horizontal lines
+    gridLines.startNewSubPath(bounds.getX(), bounds.getY() + height * 0.5f);
+    gridLines.lineTo(bounds.getX() + width, bounds.getY() + height * 0.5f);
 
-        // Horizontal line
-        float py = toPixelY(v);
-        g.drawLine(bX, py, bX + bW, py, thickness);
+    gridLines.startNewSubPath(bounds.getX(), bounds.getY() + height * 0.25f);
+    gridLines.lineTo(bounds.getX() + width, bounds.getY() + height * 0.25f);
 
-        // --- Labels ----------------------------------------------------------
-        g.setColour(COLOUR_2.withAlpha(0.75f));
-        g.setFont(labelFont);
+    gridLines.startNewSubPath(bounds.getX(), bounds.getY() + height * 0.75f);
+    gridLines.lineTo(bounds.getX() + width, bounds.getY() + height * 0.75f);
 
-        juce::String label = (v == 0.0)  ? "0"
-                           : (v ==  1.0) ? "+1"
-                           : (v == -1.0) ? "-1"
-                           : juce::String(v, 2);  // e.g. "-0.50"
-
-        const float labelW = labelFont.getStringWidthFloat(label) + 4.f;
-
-        // X-axis label — below the bottom edge, centred on the vertical line
-        g.drawText(label,
-                   juce::Rectangle<float>(px - labelW * 0.5f,
-                                          bY + bH + 2.f,
-                                          labelW, labelHeight),
-                   juce::Justification::centred, false);
-
-        // Y-axis label — left of the left edge, centred on the horizontal line
-        // (skip 0 to avoid doubling up with the x-axis label at the origin)
-        if (v != 0.0)
-            g.drawText(label,
-                       juce::Rectangle<float>(bX - labelW - 4.f,
-                                              py - labelHeight * 0.5f,
-                                              labelW, labelHeight),
-                       juce::Justification::centredRight, false);
-    }
-
-    // -------------------------------------------------------------------------
-    // Border around the display
-    // -------------------------------------------------------------------------
     g.setColour(COLOUR_2);
-    g.drawRect(bounds, 1);
+    g.strokePath(gridLines, juce::PathStrokeType(gridThickness));
 
-    // -------------------------------------------------------------------------
-    // Line joining points
-    // -------------------------------------------------------------------------
+    // Draw line conecting points
     juce::Path path;
-    path.startNewSubPath((float)x[0], (float)y[0]);
-    for (auto pointIdx = 1; pointIdx < x.size(); ++pointIdx)
-        path.lineTo((float)x[pointIdx], (float)y[pointIdx]);
+    path.startNewSubPath(bounds.getX(), bounds.getY() + yLeft);
 
+    g.setColour(COLOUR_3);
+
+    const int samplesPerSegment = 16;
+
+    for (auto pointIdx = 0; pointIdx < numPoints - 1; ++pointIdx)
+    {
+        const float y0 = (pointIdx > 0) ? yPos[pointIdx - 1] : yLeft;
+        const float y1 = yPos[pointIdx];
+        const float y2 = yPos[pointIdx + 1];
+        const float y3 = (pointIdx < numPoints - 2) ? yPos[pointIdx + 2] : yRight;
+
+        const float x1 = xPos[pointIdx];
+        const float x2 = xPos[pointIdx + 1];
+
+        for (auto s = 0; s <= samplesPerSegment; ++s)
+        {
+            const float t  = static_cast<float>(s) / samplesPerSegment;
+            const float t2 = t  * t;
+            const float t3 = t2 * t;
+
+            const float y = 0.5f * (
+                (-t3 + 2.f*t2 -        t) * y0 +
+                ( 3.f*t3 - 5.f*t2 + 2.f) * y1 +
+                (-3.f*t3 + 4.f*t2 +    t) * y2 +
+                (        t3 - t2        ) * y3
+            );
+            const float x = x1 + t * (x2 - x1);
+
+            path.lineTo(bounds.getX() + x, bounds.getY() + y);
+        }
+    }
+
+    path.lineTo(bounds.getX() + width, bounds.getY() + yRight);
+    g.strokePath(path, juce::PathStrokeType(thickness));
+
+    // Draw points on top of line
     g.setColour(COLOUR_4);
-    g.strokePath(path, juce::PathStrokeType(3.f));
+    for (auto pointIdx = 0; pointIdx < numPoints; ++pointIdx)
+    {
+        auto x = xPos[pointIdx];
+        auto y = yPos[pointIdx];
+
+        g.drawEllipse(bounds.getX() + x - pointRadius * 0.5f,
+                    bounds.getY() + y - pointRadius * 0.5f,
+                    pointRadius, pointRadius, thickness);
+    }
+
+}
+
+
+
+// ************************************ AI BELOW ************************************
+
+void WSLaf::drawTitle(
+    juce::Graphics& g,
+    juce::Rectangle<int> bounds)
+{
+    const auto  b    = bounds.toFloat();
+    const float cx   = b.getCentreX();
+    const float cy   = b.getCentreY();
+
+    const juce::String  title    = "waveshaper";
+    const float         fontSize = b.getHeight() * 0.52f;
+    const juce::Font    font { juce::FontOptions(fontSize).withStyle("Bold") };
+    const float         textW = bounds.getWidth() / 3 * 2 ; // font.getStringWidthFloat(title);
+
+    // -------------------------------------------------------------------------
+    // Background: diagonal slash fragments — electric interference pattern
+    // -------------------------------------------------------------------------
+    g.setColour(COLOUR_4.withAlpha(0.08f));
+    const float slashSpacing = b.getWidth() / 9.f;
+    for (int i = 0; i <= 9; ++i)
+    {
+        const float x = b.getX() + slashSpacing * i;
+        g.drawLine(x + 8.f, b.getY(), x - 8.f, b.getBottom(), 0.7f);
+    }
+
+    // -------------------------------------------------------------------------
+    // Glow bloom — concentric text passes, fading outward
+    // -------------------------------------------------------------------------
+    g.setFont(font);
+    for (int pass = 6; pass >= 1; --pass)
+    {
+        const float spread = pass * 1.4f;
+        const float alpha  = 0.022f * (7 - pass);
+        g.setColour(COLOUR_4.withAlpha(alpha));
+        for (float dx : { -spread, 0.f, spread })
+            for (float dy : { -spread, 0.f, spread })
+                g.drawText(title, b.translated(dx, dy).toNearestInt(),
+                           juce::Justification::centred, false);
+    }
+
+    // -------------------------------------------------------------------------
+    // Chromatic aberration — split RGB ghost layers
+    // -------------------------------------------------------------------------
+    g.setFont(font);
+    g.setColour(juce::Colour(0xffff1a3a).withAlpha(0.22f));   // red, left
+    g.drawText(title, b.translated(-2.5f, 0.f).toNearestInt(),
+               juce::Justification::centred, false);
+
+    g.setColour(juce::Colour(0xff1a3aff).withAlpha(0.22f));   // blue, right
+    g.drawText(title, b.translated(2.5f, 0.f).toNearestInt(),
+               juce::Justification::centred, false);
+
+    // -------------------------------------------------------------------------
+    // Main text body — lavender base
+    // -------------------------------------------------------------------------
+    g.setColour(COLOUR_5);                                     // 0xff9e7ef9
+    g.drawText(title, b.toNearestInt(), juce::Justification::centred, false);
+
+    // -------------------------------------------------------------------------
+    // Top-half specular highlight — makes it feel lit from above
+    // -------------------------------------------------------------------------
+    {
+        g.saveState();
+        g.reduceClipRegion(b.withHeight(b.getHeight() * 0.48f).toNearestInt());
+        g.setColour(juce::Colours::white.withAlpha(0.13f));
+        g.drawText(title, b.toNearestInt(), juce::Justification::centred, false);
+        g.restoreState();
+    }
+
+    // -------------------------------------------------------------------------
+    // Electric underline — jagged waveform-like stroke beneath the text
+    // -------------------------------------------------------------------------
+    {
+        const float lineY  = cy + fontSize * 0.58f;
+        const float lineX0 = cx - textW * 0.5f;
+        const float lineX1 = cx + textW * 0.5f;
+        const float jag    = 2.4f;
+        const float step   = 5.f;
+
+        juce::Path wave;
+        wave.startNewSubPath(lineX0, lineY);
+        bool up = true;
+        for (float x = lineX0 + step; x <= lineX1; x += step, up = !up)
+            wave.lineTo(x, lineY + (up ? -jag : jag));
+        wave.lineTo(lineX1, lineY);
+
+        g.setColour(juce::Colour(0xffecf97e).withAlpha(0.7f));          // electric yellow
+        g.strokePath(wave, juce::PathStrokeType(1.1f));
+
+        // Glow duplicate underneath
+        g.setColour(juce::Colour(0xffecf97e).withAlpha(0.15f));
+        g.strokePath(wave, juce::PathStrokeType(3.5f));
+    }
+
+    // -------------------------------------------------------------------------
+    // Flanking oscilloscope lines with tick marks
+    // -------------------------------------------------------------------------
+    const float ruleY   = cy;
+    const float gap     = 8.f;
+    const float ruleX0  = cx - textW * 0.5f - gap;
+    const float ruleX1  = cx + textW * 0.5f + gap;
+
+    g.setColour(COLOUR_4.withAlpha(0.55f));
+    g.drawLine(b.getX() + 6.f, ruleY, ruleX0, ruleY, 1.f);
+    g.drawLine(ruleX1, ruleY, b.getRight() - 6.f, ruleY, 1.f);
+
+    g.setColour(COLOUR_5.withAlpha(0.35f));
+    for (float x = b.getX() + 10.f; x < ruleX0 - 4.f; x += 5.f)
+        g.drawLine(x, ruleY - 2.5f, x, ruleY + 2.5f, 0.8f);
+    for (float x = ruleX1 + 4.f; x < b.getRight() - 10.f; x += 5.f)
+        g.drawLine(x, ruleY - 2.5f, x, ruleY + 2.5f, 0.8f);
+
+    // -------------------------------------------------------------------------
+    // Corner L-ticks — all four corners, matching LAF language
+    // -------------------------------------------------------------------------
+    const float tkL = 5.f;
+    const float tkW = 1.2f;
+    g.setColour(COLOUR_4.withAlpha(0.65f));
+
+    // Top-left
+    g.drawLine(b.getX(),            b.getY(), b.getX() + tkL, b.getY(),        tkW);
+    g.drawLine(b.getX(),            b.getY(), b.getX(),        b.getY() + tkL, tkW);
+    // Top-right
+    g.drawLine(b.getRight() - tkL,  b.getY(), b.getRight(),   b.getY(),        tkW);
+    g.drawLine(b.getRight(),         b.getY(), b.getRight(),   b.getY() + tkL, tkW);
+    // Bottom-left
+    g.drawLine(b.getX(),            b.getBottom(), b.getX() + tkL, b.getBottom(),        tkW);
+    g.drawLine(b.getX(),            b.getBottom() - tkL, b.getX(), b.getBottom(),        tkW);
+    // Bottom-right
+    g.drawLine(b.getRight() - tkL,  b.getBottom(), b.getRight(), b.getBottom(),          tkW);
+    g.drawLine(b.getRight(),         b.getBottom() - tkL, b.getRight(), b.getBottom(),   tkW);
 }
 
 
@@ -158,8 +285,8 @@ void WSLaf::drawRotarySlider(
                            0.f, rotaryStartAngle, rotaryEndAngle, true);
         g.setColour(COLOUR_2.withAlpha(0.4f));
         g.strokePath(ring, juce::PathStrokeType(ringW,
-                                                juce::PathStrokeType::butt,
-                                                juce::PathStrokeType::rounded));
+                                                juce::PathStrokeType::JointStyle::curved,
+                                                juce::PathStrokeType::EndCapStyle::rounded));
     }
 
     // -------------------------------------------------------------------------
@@ -172,8 +299,8 @@ void WSLaf::drawRotarySlider(
                                0.f, rotaryStartAngle, angle, true);
         g.setColour(COLOUR_4);
         g.strokePath(valueArc, juce::PathStrokeType(arcW,
-                                                     juce::PathStrokeType::butt,
-                                                     juce::PathStrokeType::rounded));
+                                                     juce::PathStrokeType::JointStyle::curved,
+                                                     juce::PathStrokeType::EndCapStyle::rounded));
     }
 
     // -------------------------------------------------------------------------
@@ -244,8 +371,8 @@ void WSLaf::drawLinearSlider(
     juce::Graphics& g,
     int x, int y, int width, int height,
     float sliderPos,
-    float /*minSliderPos*/,
-    float /*maxSliderPos*/,
+    float minSliderPos,
+    float maxSliderPos,
     juce::Slider::SliderStyle style,
     juce::Slider& slider)
 {
@@ -363,80 +490,68 @@ void WSLaf::drawLinearSlider(
 // -------------------------------------------------------------------------
 // BUTTONS
 // -------------------------------------------------------------------------
-void WSLaf::drawToggleButton(
+void WSLaf::drawButtonBackground(
     juce::Graphics& g,
-    juce::ToggleButton& button,
+    juce::Button& button,
+    const juce::Colour& backgroundColour,
     bool shouldDrawButtonAsHighlighted,
     bool shouldDrawButtonAsDown)
 {
-    const auto bounds     = button.getLocalBounds().toFloat();
-    const bool isOn       = button.getToggleState();
-    const float h         = bounds.getHeight();
+    const auto bounds = button.getLocalBounds().toFloat();
+    const bool isOn   = button.getToggleState();
 
     // -------------------------------------------------------------------------
-    // Indicator box geometry — left-aligned, square, vertically centred
-    // -------------------------------------------------------------------------
-    constexpr float boxSize = 14.f;
-    const float boxX = 4.f;
-    const float boxY = (h - boxSize) * 0.5f;
-    const juce::Rectangle<float> box(boxX, boxY, boxSize, boxSize);
-
-    // -------------------------------------------------------------------------
-    // Hover / press state — subtle brightening of the box area
+    // Hover / press state — matches toggle box hover language
     // -------------------------------------------------------------------------
     if (shouldDrawButtonAsDown)
     {
         g.setColour(COLOUR_4.withAlpha(0.12f));
-        g.fillRect(box.expanded(4.f));
+        g.fillRect(bounds);
     }
     else if (shouldDrawButtonAsHighlighted)
     {
         g.setColour(COLOUR_2.withAlpha(0.10f));
-        g.fillRect(box.expanded(4.f));
+        g.fillRect(bounds);
     }
 
     // -------------------------------------------------------------------------
-    // Box fill — dark body so the accent cuts through cleanly
+    // Body fill
     // -------------------------------------------------------------------------
     g.setColour(COLOUR_3);
-    g.fillRect(box);
+    g.fillRect(bounds);
 
     // -------------------------------------------------------------------------
-    // ON state: red fill + inner cross-bar (like a lit indicator)
+    // ON state: accent fill + horizontal bar (mirrors toggle indicator)
     // -------------------------------------------------------------------------
     if (isOn)
     {
-        // Filled accent background
         g.setColour(COLOUR_4.withAlpha(0.18f));
-        g.fillRect(box);
+        g.fillRect(bounds);
 
-        // Horizontal bar through the centre — same language as linear thumb
-        const float barH  = 2.5f;
-        const float barY  = boxY + (boxSize - barH) * 0.5f;
+        const float barH = 2.5f;
+        const float barY = bounds.getCentreY() - barH * 0.5f;
         g.setColour(COLOUR_4);
-        g.fillRect(juce::Rectangle<float>(boxX, barY, boxSize, barH));
+        g.fillRect(juce::Rectangle<float>(bounds.getX(), barY, bounds.getWidth(), barH));
 
-        // Ice-blue end caps — same detail as linear slider thumb
+        // Ice-blue end caps
         g.setColour(COLOUR_1.withAlpha(0.7f));
-        g.fillRect(juce::Rectangle<float>(boxX,                    barY, 2.f, barH));
-        g.fillRect(juce::Rectangle<float>(boxX + boxSize - 2.f,    barY, 2.f, barH));
+        g.fillRect(juce::Rectangle<float>(bounds.getX(),                        barY, 2.f, barH));
+        g.fillRect(juce::Rectangle<float>(bounds.getX() + bounds.getWidth() - 2.f, barY, 2.f, barH));
 
-        // Outer border — accent colour when on
         g.setColour(COLOUR_4.withAlpha(0.75f));
-        g.drawRect(box, 1.f);
+        g.drawRect(bounds, 1.f);
     }
     // -------------------------------------------------------------------------
-    // OFF state: just the dim border
+    // OFF state: dim border
     // -------------------------------------------------------------------------
     else
     {
         g.setColour(COLOUR_2.withAlpha(0.4f));
-        g.drawRect(box, 1.f);
+        g.drawRect(bounds, 1.f);
     }
 
     // -------------------------------------------------------------------------
-    // Corner ticks — small L-shaped marks at two opposite corners
-    // Mirrors the tick-mark language from the rotary / linear sliders
+    // Corner ticks — same L-shaped marks at two opposite corners
     // -------------------------------------------------------------------------
     const float tickLen = 4.f;
     const float tickW   = 1.2f;
@@ -446,27 +561,30 @@ void WSLaf::drawToggleButton(
     g.setColour(tickCol);
 
     // Top-left
-    g.drawLine(boxX - 3.f, boxY,        boxX - 3.f + tickLen, boxY,        tickW); // horizontal
-    g.drawLine(boxX - 3.f, boxY,        boxX - 3.f,           boxY + tickLen, tickW); // vertical
+    g.drawLine(bounds.getX(),              bounds.getY(), bounds.getX() + tickLen, bounds.getY(),        tickW);
+    g.drawLine(bounds.getX(),              bounds.getY(), bounds.getX(),           bounds.getY() + tickLen, tickW);
 
     // Bottom-right
-    const float brX = boxX + boxSize + 2.f;
-    const float brY = boxY + boxSize;
-    g.drawLine(brX - tickLen, brY, brX, brY,        tickW);
-    g.drawLine(brX,           brY - tickLen, brX, brY, tickW);
+    const float brX = bounds.getRight();
+    const float brY = bounds.getBottom();
+    g.drawLine(brX - tickLen, brY, brX, brY,             tickW);
+    g.drawLine(brX,           brY - tickLen, brX, brY,   tickW);
+}
 
-    // -------------------------------------------------------------------------
-    // Label text
-    // -------------------------------------------------------------------------
-    const float labelX = boxX + boxSize + 10.f;
+void WSLaf::drawButtonText(
+    juce::Graphics& g,
+    juce::TextButton& button,
+    bool shouldDrawButtonAsHighlighted,
+    bool shouldDrawButtonAsDown)
+{
+    const auto  bounds = button.getLocalBounds().toFloat();
+    const bool  isOn   = button.getToggleState();
+
     const juce::Colour textCol = isOn
                                ? COLOUR_0
                                : COLOUR_2.withAlpha(0.65f);
 
     g.setColour(textCol);
     g.setFont(juce::Font(juce::FontOptions(12.f).withStyle("Regular")));
-    g.drawText(button.getButtonText(),
-               juce::Rectangle<float>(labelX, 0.f,
-                                      bounds.getWidth() - labelX, h),
-               juce::Justification::centredLeft, true);
+    g.drawText(button.getButtonText(), bounds, juce::Justification::centred, true);
 }
