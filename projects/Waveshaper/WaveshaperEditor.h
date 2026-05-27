@@ -38,7 +38,7 @@ private:
 
     // Labels
     juce::Rectangle<int> titleBounds;
-    juce::Label dryWetLabel     { "dryWetLabel"     , "DRY / WET" };
+    juce::Label dryWetLabel     { "dryWetLabel"     , "MIX" };
     juce::Label inputGainLabel  { "inGainLabel"     , "DRIVE" };
     juce::Label outputGainLabel { "outGainLabel"    , "OUTPUT" };
     juce::Label xLabel          { "xLabel"          , "X" };

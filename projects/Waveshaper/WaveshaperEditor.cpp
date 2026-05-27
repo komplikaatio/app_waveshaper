@@ -174,7 +174,7 @@ void WaveshaperEditor::resized()
     
     dryWetLabel     .setBounds( rightBounds.removeFromTop(labelHeight));
     dryWetSlider    .setBounds( rightBounds.removeFromTop(dryWetHeight));
-    outputGainLabel .setBounds( rightBounds.removeFromTop(labelHeight));
+    outputGainLabel .setBounds( rightBounds.removeFromBottom(labelHeight));
     outputGainSlider.setBounds( rightBounds);
 
     // Centre
