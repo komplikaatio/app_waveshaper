@@ -43,10 +43,6 @@ private:
     juce::Label outputGainLabel { "outGainLabel"    , "OUTPUT" };
     juce::Label xLabel          { "xLabel"          , "X" };
     juce::Label yLabel          { "yLabel"          , "Y" };
-    juce::Label xRangeLabel     { "xRangelabel"     , "RANGE" };
-    juce::Label yRangeLabel     { "yRangelabel"     , "RANGE" };
-    juce::Label xRateLabel      { "xRatelabel"      , "RATE" };
-    juce::Label yRateLabel      { "yRatelabel"      , "RATE" };
 
     // Display
     juce::Rectangle<int> displayBounds;

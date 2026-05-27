@@ -59,10 +59,6 @@ WaveshaperEditor::WaveshaperEditor(WaveshaperProcessor& p) :
     outputGainLabel .setJustificationType(juce::Justification::centred);
     xLabel          .setJustificationType(juce::Justification::centred);
     yLabel          .setJustificationType(juce::Justification::centred);
-    xRangeLabel     .setJustificationType(juce::Justification::centred);
-    yRangeLabel     .setJustificationType(juce::Justification::centred);
-    xRateLabel      .setJustificationType(juce::Justification::centred);
-    yRateLabel      .setJustificationType(juce::Justification::centred);
 
     // Add components
     addAndMakeVisible(enabledButton);
@@ -76,10 +72,6 @@ WaveshaperEditor::WaveshaperEditor(WaveshaperProcessor& p) :
     addAndMakeVisible(outputGainLabel );
     addAndMakeVisible(xLabel);
     addAndMakeVisible(yLabel);
-    addAndMakeVisible(xRangeLabel);
-    addAndMakeVisible(yRangeLabel);
-    addAndMakeVisible(xRateLabel);
-    addAndMakeVisible(yRateLabel);
     for (auto& point : pointComponents)
     {
         addAndMakeVisible(*point);
