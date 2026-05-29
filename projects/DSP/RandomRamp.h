@@ -70,7 +70,7 @@ public:
         rampTime = std::fmax(newRampTimeSec, minRampTime);
     }
 
-    float getNext()
+    F getNext()
     {
         const F targetDelta { std::fabs(targetValue - currentValue) };
         if ((targetDelta > std::fabs(static_cast<F>(2) * rampStep)) && (std::fabs(rampStep) > minDelta))
@@ -122,7 +122,7 @@ private:
 
     std::random_device rd;
     std::mt19937 gen;
-    std::uniform_real_distribution<float> randomDist;
+    std::uniform_real_distribution<F> randomDist;
 };
 
 }

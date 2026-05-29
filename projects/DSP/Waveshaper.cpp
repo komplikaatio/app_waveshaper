@@ -199,16 +199,59 @@ void Waveshaper::step()
     for (auto pointIdx = 0; pointIdx < WS_POINTS; ++pointIdx)
     {
         auto& point = getPoint(pointIdx);
-        auto x          = point.xRamp       .getNext();
-        auto xRandom    = point.xRandomRamp .getNext();
-        auto y          = point.yRamp       .getNext();
-        auto yRandom    = point.yRandomRamp .getNext();
-
-        point.x = std::clamp(x + xRandom, X_MIN, X_MAX);
-        point.y = std::clamp(y + yRandom, Y_MIN, Y_MAX);
+        
+        // Get X target and random offset
+        auto xTarget = point.xRamp.getNext();
+        auto xRandom = point.xRandomRamp.getNext();
+        
+        // Calculate allowed X range for this point
+        float pointMinX = X_MIN + pointIdx * SizeX;
+        float pointMaxX = pointMinX + SizeX;
+        
+        // Tentative X position
+        float finalX = xTarget + xRandom;
+        
+        // Reflect X off boundaries (like a ball bouncing)
+        if (finalX < pointMinX) {
+            finalX = pointMinX + (pointMinX - finalX);
+            // If reflection still out of bounds, wrap around
+            if (finalX > pointMaxX) {
+                finalX = pointMaxX - (finalX - pointMaxX);
+            }
+        } else if (finalX > pointMaxX) {
+            finalX = pointMaxX - (finalX - pointMaxX);
+            if (finalX < pointMinX) {
+                finalX = pointMinX + (pointMinX - finalX);
+            }
+        }
+        
+        // Get Y target and random offset
+        auto yTarget = point.yRamp.getNext();
+        auto yRandom = point.yRandomRamp.getNext();
+        
+        // Tentative Y position
+        float finalY = yTarget + yRandom;
+        
+        // Reflect Y off boundaries (all points share the same Y range)
+        if (finalY < Y_MIN) {
+            finalY = Y_MIN + (Y_MIN - finalY);
+            // If reflection still out of bounds, wrap around
+            if (finalY > Y_MAX) {
+                finalY = Y_MAX - (finalY - Y_MAX);
+            }
+        } else if (finalY > Y_MAX) {
+            finalY = Y_MAX - (finalY - Y_MAX);
+            if (finalY < Y_MIN) {
+                finalY = Y_MIN + (Y_MIN - finalY);
+            }
+        }
+        
+        // Apply clamped positions
+        point.x = finalX;
+        point.y = finalY;
     }
-
-    // Set ends
+    
+    // Set ends (Y-only points)
     points[0]           .y = points[0]           .yRamp.getNext();
     points[WS_POINTS+1] .y = points[WS_POINTS+1] .yRamp.getNext();
 }
