@@ -41,6 +41,13 @@ void XYPad::mouseExit(const juce::MouseEvent &event)
     repaint();
 }
 
+void XYPad::mouseDoubleClick(const juce::MouseEvent &event)
+{
+    // Just transfer event to both sliders
+    xSlider.mouseDoubleClick(event);
+    ySlider.mouseDoubleClick(event);
+}
+
 void XYPad::updateFromMouse(juce::Point<float> pos)
 {
     auto bounds = getLocalBounds().toFloat();

@@ -8,7 +8,7 @@ void WSLaf::drawDocumentWindowBackground(
 {
     // Create a linear gradient between the first two colors
     juce::ColourGradient gradient (COLOUR_0, 0.0f, 0.0f, 
-                                    COLOUR_0, 0.0f, (float)bounds.getHeight(), false);
+                                    COLOUR_0, 0.0f, (float)bounds.getX() + (float)bounds.getHeight(), false);
 
     // Add the third color at the 50% mark (0.5 proportion)
     gradient.addColour (0.5, COLOUR_0);

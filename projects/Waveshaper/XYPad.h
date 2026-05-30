@@ -15,6 +15,7 @@ public:
     void mouseDrag(const juce::MouseEvent& e) override;
     void mouseEnter(const juce::MouseEvent &event) override;
     void mouseExit(const juce::MouseEvent &event) override;
+    void mouseDoubleClick(const juce::MouseEvent &event) override;
 
 private:
     void updateFromMouse(juce::Point<float> pos);
