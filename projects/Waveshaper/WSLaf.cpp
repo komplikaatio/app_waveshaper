@@ -52,7 +52,15 @@ void WSLaf::drawDisplay(
 {
     assert(xPos.size() == yPos.size());
 
-    g.setColour(PAD_NAVY);
+    g.setColour(PAD_NAVY.withAlpha(0.3f));
+    juce::ColourGradient gradient(
+        PAD_NAVY.withAlpha(0.1f),         
+        bounds.getX(), bounds.getY(),      
+        PAD_BLUE.withAlpha(0.9f),             
+        bounds.getX(), bounds.getBottom(), 
+        false                               
+    );
+    g.setGradientFill(gradient);
     g.fillRect(bounds);
 
     const auto numPoints     = xPos.size();
@@ -359,7 +367,7 @@ void WSLaf::drawButtonBackground(
     const bool isOn   = button.getToggleState();
 
     // Body fill
-    g.setColour(isOn ? UI_MID.brighter(0.15f) : UI_MID.darker(0.3f));
+    g.setColour(isOn ? UI_MID.withAlpha(0.9f) : UI_MID.withAlpha(0.7f));
     g.fillRect(bounds);
 
     // Hover / press
