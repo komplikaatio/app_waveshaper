@@ -1,17 +1,14 @@
 #include "WaveshaperEditor.h"
 
-// Width of the whole GUI
-static constexpr int WIDTH { 1000 };
-
-// Height of the whole GUI
-static constexpr int HEIGHT { 650 };
+static constexpr int WIDTH  { 1000 };
+static constexpr int HEIGHT { 550 };
 
 WaveshaperEditor::WaveshaperEditor(WaveshaperProcessor& p) :
     juce::AudioProcessorEditor(p),
     processor   { p },
     waveshaper  { p.getWaveshaper() },
 
-    // InitializeSliders
+    // Initialize sliders
     enabledButton   ( Param::ID::Enabled        , processor.getParameterManager().getAPVTS() ),
     dryWetSlider    ( Param::ID::DryWet         , processor.getParameterManager().getAPVTS() ),
     inputGainSlider ( Param::ID::InputGain      , processor.getParameterManager().getAPVTS() ),
@@ -21,16 +18,14 @@ WaveshaperEditor::WaveshaperEditor(WaveshaperProcessor& p) :
 {
     auto& apvts = processor.getParameterManager().getAPVTS();
 
-    // Set button text (NO text better)
     enabledButton.setButtonText("");
+    enabledButton.setClickingTogglesState(true);
 
-    // Initialize points
+    // Initialize point components + pads
     for (auto pointIdx = 0; pointIdx < NumPoints; ++pointIdx)
     {
         auto point = std::make_unique<WSPointComponent>(
-            pointIdx,
-            apvts,
-            waveshaper
+            pointIdx, apvts, waveshaper
         );
 
         pads.push_back(std::make_unique<XYPad>(
@@ -40,25 +35,58 @@ WaveshaperEditor::WaveshaperEditor(WaveshaperProcessor& p) :
         pointComponents.push_back(std::move(point));
     }
 
-    // Set sliders style
+    // Drive, Mix, Output
     dryWetSlider    .setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
-    inputGainSlider .setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
-    outputGainSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
+    inputGainSlider .setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
+    outputGainSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
+
+    // yLeft / yRight vertical sliders 
     yLeftSlider     .setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
     yRightSlider    .setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
 
-    dryWetSlider    .setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxBelow, false, 40, 15);
-    inputGainSlider .setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxBelow, false, 40, 15);
-    outputGainSlider.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxBelow, false, 40, 15);
-    yLeftSlider     .setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxBelow, false, 40, 15);
-    yRightSlider    .setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxBelow, false, 40, 15);
+    // Text boxes
+    dryWetSlider    .setTextBoxStyle(juce::Slider::TextBoxBelow, false, 48, 15);
+    inputGainSlider .setTextBoxStyle(juce::Slider::TextBoxBelow, false, 48, 15);
+    outputGainSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 48, 15);
+    yLeftSlider     .setTextBoxStyle(juce::Slider::TextBoxBelow, true, 40, 14);
+    yRightSlider    .setTextBoxStyle(juce::Slider::TextBoxBelow, true, 40, 14);
 
-    // Set labels justification
-    dryWetLabel     .setJustificationType(juce::Justification::centred);
-    inputGainLabel  .setJustificationType(juce::Justification::centred);
-    outputGainLabel .setJustificationType(juce::Justification::centred);
-    xLabel          .setJustificationType(juce::Justification::centred);
-    yLabel          .setJustificationType(juce::Justification::centred);
+    // Force invisible text box borders directly on each slider
+    auto hideTextBox = [](juce::Slider& s)
+    {
+        s.setColour(juce::Slider::textBoxOutlineColourId,    juce::Colours::transparentBlack);
+        s.setColour(juce::Slider::textBoxBackgroundColourId, juce::Colours::transparentBlack);
+    };
+    hideTextBox(dryWetSlider);
+    hideTextBox(inputGainSlider);
+    hideTextBox(outputGainSlider);
+    hideTextBox(yLeftSlider);
+    hideTextBox(yRightSlider);
+
+    // Force digit formatting 
+    auto fmtDb  = [](double v) { return juce::String(v, 1); };   
+    auto fmtMix = [](double v) { return juce::String(v, 2); };   
+    auto fmtPos = [](double v) { return juce::String(v, 2); }; 
+
+    inputGainSlider .textFromValueFunction = fmtDb;
+    outputGainSlider.textFromValueFunction = fmtDb;
+    dryWetSlider    .textFromValueFunction = fmtMix;
+    yLeftSlider     .textFromValueFunction = fmtPos;
+    yRightSlider    .textFromValueFunction = fmtPos;
+
+    // Label styling
+    auto styleLabel = [](juce::Label& label, float fontSize = 11.f)
+    {
+        label.setJustificationType(juce::Justification::centred);
+        label.setFont(juce::Font(juce::FontOptions(fontSize)));
+    };
+    styleLabel(dryWetLabel);
+    styleLabel(inputGainLabel);
+    styleLabel(outputGainLabel);
+    styleLabel(xLabel, 9.f);
+    styleLabel(yLabel, 9.f);
+    styleLabel(controlYLabel, 12.f);
+    styleLabel(controlXLabel, 12.f);
 
     // Add components
     addAndMakeVisible(enabledButton);
@@ -67,31 +95,23 @@ WaveshaperEditor::WaveshaperEditor(WaveshaperProcessor& p) :
     addAndMakeVisible(outputGainSlider);
     addAndMakeVisible(yLeftSlider);
     addAndMakeVisible(yRightSlider);
-    addAndMakeVisible(dryWetLabel );
+    addAndMakeVisible(dryWetLabel);
     addAndMakeVisible(inputGainLabel);
-    addAndMakeVisible(outputGainLabel );
+    addAndMakeVisible(outputGainLabel);
     addAndMakeVisible(xLabel);
     addAndMakeVisible(yLabel);
-    for (auto& point : pointComponents)
-    {
-        addAndMakeVisible(*point);
-    }
-    for (auto& pad : pads)
-    {
-        addAndMakeVisible(*pad);
-    }
+    addAndMakeVisible(controlYLabel);
+    addAndMakeVisible(controlXLabel);
 
-    // Set Look and Feel
+    for (auto& point : pointComponents) { addAndMakeVisible(*point); }
+    for (auto& pad : pads)              { addAndMakeVisible(*pad); }
+
     setLookAndFeel(&wsLaf);
-
-    // Start timer
     startTimerHz(30);
 
-    // Alocate space for point positions
     currentXs.resize(NumPoints);
     currentYs.resize(NumPoints);
 
-    // Set window size
     setSize(WIDTH, HEIGHT);
 }
 
@@ -102,36 +122,27 @@ WaveshaperEditor::~WaveshaperEditor()
 
 void WaveshaperEditor::paint(juce::Graphics& g)
 {
-    // Get custom Look and Feel
     auto* laf = dynamic_cast<WSLaf*>(&getLookAndFeel());
     if (!laf) return;
 
-    // Draw background
     laf->drawDocumentWindowBackground(g, getLocalBounds());
 
-    // Draw display
-
-    // Get (atomically) current points position and normalize
-    for(auto pointIdx = 0; pointIdx < NumPoints; ++pointIdx)
+    for (auto pointIdx = 0; pointIdx < NumPoints; ++pointIdx)
     {
         auto x = waveshaper.getCurrentX(pointIdx);
         auto y = waveshaper.getCurrentY(pointIdx);
 
-        // Convert to position on screen
-        x = displayBounds.getWidth() * ((x + 1.f) * 0.5f);
-        y = displayBounds.getHeight() * (1.f - (y + 1.f) * 0.5f); // Invert
+        x = displayBounds.getWidth()  * ((x + 1.f) * 0.5f);
+        y = displayBounds.getHeight() * (1.f - (y + 1.f) * 0.5f);
 
         currentXs[pointIdx] = x;
         currentYs[pointIdx] = y;
     }
 
-    auto yLeft   = displayBounds.getHeight() * (1.f - (yLeftSlider.getValue() + 1.f) * 0.5f); // Invert
-    auto yRight  = displayBounds.getHeight() * (1.f - (yRightSlider.getValue() + 1.f) * 0.5f); // Invert
+    auto yLeft  = displayBounds.getHeight() * (1.f - (yLeftSlider.getValue()  + 1.f) * 0.5f);
+    auto yRight = displayBounds.getHeight() * (1.f - (yRightSlider.getValue() + 1.f) * 0.5f);
 
     laf->drawDisplay(g, displayBounds, currentXs, currentYs, yLeft, yRight);
-
-    // Draw title
-    laf->drawTitle(g, titleBounds);
 }
 
 void WaveshaperEditor::resized()
@@ -139,51 +150,75 @@ void WaveshaperEditor::resized()
     const auto margin = 5;
     auto bounds = getLocalBounds().reduced(margin);
 
-    const auto sideWidth        = bounds.getWidth() / 9;
-    const auto titleHeight      = bounds.getHeight() / 12;
-    const auto displayHeight    = bounds.getHeight() / 3 - titleHeight;
-    const auto yWidth           = sideWidth / 2;
-    const auto labelHeight      = bounds.getHeight() / 30;
-    const auto enabledHeight    = bounds.getHeight() / 20;
-    const auto dryWetHeight     = bounds.getHeight() / 12;
+    // Vertical proportions
+    const auto titleHeight   = bounds.getHeight() / 12;
+    const auto bottomRowH    = bounds.getHeight() / 6;
+    const auto labelHeight   = 14;
+    const auto enabledW      = 36;
+    const auto enabledH      = 24;
+    const auto sideWidth     = bounds.getWidth() / 18;  
 
-    // Left side
-    auto leftBounds     =       bounds          .removeFromLeft (sideWidth);
-    auto xyLabelBounds  =       leftBounds      .removeFromRight(yWidth);
-    
-    yLeftSlider     .setBounds( xyLabelBounds   .removeFromTop(displayHeight + titleHeight).removeFromBottom(displayHeight));
-    xLabel          .setBounds( xyLabelBounds   .removeFromTop(xyLabelBounds.getHeight() / 2));
-    yLabel          .setBounds( xyLabelBounds);
+    // Bottom row: Drive, Mix, Output knobs
+    auto bottomBounds = bounds.removeFromBottom(bottomRowH);
 
-    enabledButton   .setBounds( leftBounds .removeFromTop(enabledHeight));
-    inputGainLabel  .setBounds( leftBounds .removeFromBottom(labelHeight));
-    inputGainSlider .setBounds( leftBounds);
+    const auto knobAreaWidth = juce::jmin(bottomBounds.getWidth() * 2 / 3, 420);
+    auto knobArea = bottomBounds.withSizeKeepingCentre(knobAreaWidth, bottomBounds.getHeight());
+    const auto knobColW = knobArea.getWidth() / 3;
 
-    // Right side
-    auto rightBounds = bounds.removeFromRight(sideWidth);
+    auto driveBounds  = knobArea.removeFromLeft(knobColW);
+    auto mixBounds    = knobArea.removeFromLeft(knobColW);
+    auto outputBounds = knobArea;
 
-    yRightSlider    .setBounds( rightBounds.removeFromLeft(yWidth).removeFromTop(displayHeight + titleHeight).removeFromBottom(displayHeight));
-    
-    dryWetLabel     .setBounds( rightBounds.removeFromTop(labelHeight));
-    dryWetSlider    .setBounds( rightBounds.removeFromTop(dryWetHeight));
-    outputGainLabel .setBounds( rightBounds.removeFromBottom(labelHeight));
-    outputGainSlider.setBounds( rightBounds);
+    inputGainLabel  .setBounds(driveBounds .removeFromTop(labelHeight));
+    inputGainSlider .setBounds(driveBounds);
 
-    // Centre
-    titleBounds     = bounds.removeFromTop(titleHeight);
-    displayBounds   = bounds.removeFromTop(displayHeight);
+    dryWetLabel     .setBounds(mixBounds   .removeFromTop(labelHeight));
+    dryWetSlider    .setBounds(mixBounds);
+
+    outputGainLabel .setBounds(outputBounds.removeFromTop(labelHeight));
+    outputGainSlider.setBounds(outputBounds);
+
+    // Title row: enabled button, space for title
+    auto titleRow = bounds.removeFromTop(titleHeight);
+    enabledButton.setBounds(titleRow.removeFromLeft(enabledW).withSizeKeepingCentre(enabledW, enabledH));
+    titleBounds = titleRow;
+
+    // Display
+    const auto displayHeight = bounds.getHeight() / 2;
+    auto displayRow = bounds.removeFromTop(displayHeight);
+
+    // yLeft and yRight
+    yLeftSlider .setBounds(displayRow.removeFromLeft(sideWidth));
+    yRightSlider.setBounds(displayRow.removeFromRight(sideWidth));
+    displayBounds = displayRow;
     auto padsBounds = displayBounds;
-    
+
+    // Point components below display:
+    // Align with display by trimming same side widths
+    bounds.removeFromLeft(sideWidth);
+    bounds.removeFromRight(sideWidth);
+
+    const auto titleRowH = 25;
+
+    // "Control Y"
+    auto controlYRow  = bounds.removeFromTop(titleRowH);
+    separatorTopY     = controlYRow.getCentreY();
+    controlYLabel.setBounds(controlYRow);
+
+    // "Control X" 
+    auto controlXRow  = bounds.removeFromBottom(titleRowH);
+    separatorBottomY  = controlXRow.getCentreY();
+    controlXLabel.setBounds(controlXRow);
+
+    // Point components
     const auto pointWidth = bounds.getWidth() / NumPoints;
     for (auto pointIdx = 0; pointIdx < NumPoints - 1; ++pointIdx)
     {
-        pointComponents[pointIdx]   ->setBounds(bounds      .removeFromLeft(pointWidth));
-        pads[pointIdx]              ->setBounds(padsBounds  .removeFromLeft(pointWidth));
+        pointComponents[pointIdx]->setBounds(bounds    .removeFromLeft(pointWidth));
+        pads[pointIdx]           ->setBounds(padsBounds.removeFromLeft(pointWidth));
     }
-    // Assign rest to last point
     pointComponents[NumPoints - 1]->setBounds(bounds);
-    pads[NumPoints - 1]->setBounds(padsBounds);
-
+    pads[NumPoints - 1]           ->setBounds(padsBounds);
 }
 
 void WaveshaperEditor::timerCallback()

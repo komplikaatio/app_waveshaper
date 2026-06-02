@@ -32,10 +32,8 @@ private:
     mrta::ParameterSlider yRangeSlider;
     mrta::ParameterSlider yRateSlider;
 
-    juce::Label xRangeLabel { "", "RANGE" };
-    juce::Label xRateLabel  { "", "RATE" };
-    juce::Label yRangeLabel { "", "RANGE" };
-    juce::Label yRateLabel  { "", "RATE" };
+    juce::Label RangeLabel { "", "RANGE" };
+    juce::Label RateLabel  { "", "RATE" };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WSPointComponent)
 };

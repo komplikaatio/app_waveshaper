@@ -16,7 +16,6 @@ project(MRTA VERSION 0.1.0 LANGUAGES C CXX)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(add_plugin)
 
-
 # General variables
 # You should change this to something more interesting
 set(company_name "Modern Real-Time Audio")
@@ -341,3 +340,18 @@ add_plugin(waveshaper
         ${gui_source}
         ${dsp_source}
         ${waveshaper})
+
+set_target_properties(waveshaper PROPERTIES JUCE_COPY_PLUGIN_AFTER_BUILD FALSE)
+
+juce_add_binary_data(Assets
+    SOURCES
+        ${waveshaper}/Assets/ws_bg.svg
+)
+target_link_libraries(waveshaper
+    PRIVATE
+        Assets
+)
+target_include_directories(waveshaper
+    PRIVATE
+        $<TARGET_PROPERTY:Assets,JUCE_BINARY_DATA_INCLUDE_DIRS>
+)

@@ -43,6 +43,8 @@ private:
     juce::Label outputGainLabel { "outGainLabel"    , "OUTPUT" };
     juce::Label xLabel          { "xLabel"          , "X" };
     juce::Label yLabel          { "yLabel"          , "Y" };
+    juce::Label controlYLabel   { "controlYLabel"   , "CONTROL Y" };
+    juce::Label controlXLabel   { "controlXLabel"   , "CONTROL X" };
 
     // Display
     juce::Rectangle<int> displayBounds;
@@ -50,6 +52,9 @@ private:
     std::vector<float> currentXs;
     std::vector<float> currentYs;
 
+    // Separator positions (set in resized, drawn in paint)
+    int separatorTopY    { 0 };  // above point components (below display)
+    int separatorBottomY { 0 };  // below point components (above bottom knobs)
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WaveshaperEditor)
 };

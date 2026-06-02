@@ -13,8 +13,9 @@ void XYPad::paint(juce::Graphics& g)
 {
     if (hover)
     {
-        g.setColour(juce::Colour(0x05ffffff));
+        g.setColour(juce::Colour(0x05ffffff).withAlpha(0.1f));
         g.fillRect(getLocalBounds());
+        return;
     }
 }
 
@@ -63,7 +64,7 @@ void XYPad::updateFromMouse(juce::Point<float> pos)
                                 (float)xSlider.getMaximum());
 
     double newY = juce::jmap(clampedY,
-                                bounds.getBottom(), bounds.getY(), // Y is flipped
+                                bounds.getBottom(), bounds.getY(),
                                 (float)ySlider.getMinimum(),
                                 (float)ySlider.getMaximum());
 
