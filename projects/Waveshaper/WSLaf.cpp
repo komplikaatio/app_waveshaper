@@ -220,8 +220,8 @@ void WSLaf::drawRotarySlider(
 
     // Pointer
     {
-        const float cos_a  = std::cos(angle);
-        const float sin_a  = std::sin(angle);
+        const float cos_a  = std::cos(angle-190);
+        const float sin_a  = std::sin(angle-190);
         const float pInner = bodyRadius * 0.18f;
         const float pOuter = bodyRadius * 0.82f;
 

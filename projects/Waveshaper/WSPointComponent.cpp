@@ -25,42 +25,21 @@ WSPointComponent::WSPointComponent(
     xRangeSlider    .setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
     xRateSlider     .setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
 
-    // All text boxes below — larger height so font stays readable
-    const int valW = 38;
-    const int valH = 12;
-    xSlider         .setTextBoxStyle(juce::Slider::TextBoxBelow, false, valW, valH);
-    ySlider         .setTextBoxStyle(juce::Slider::TextBoxBelow, false, valW, valH);
-    xRangeSlider    .setTextBoxStyle(juce::Slider::TextBoxBelow, false, valW, valH);
-    xRateSlider     .setTextBoxStyle(juce::Slider::TextBoxBelow, false, valW, valH);
-    yRangeSlider    .setTextBoxStyle(juce::Slider::TextBoxBelow, false, valW, valH);
-    yRateSlider     .setTextBoxStyle(juce::Slider::TextBoxBelow, false, valW, valH);
-
-    // Force invisible text box borders directly on each slider
-    auto hideTextBox = [](juce::Slider& s)
+    // Add style
+    auto styleTextBox = [](juce::Slider& s)
     {
+        s.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 40, 12);
         s.setColour(juce::Slider::textBoxOutlineColourId,    juce::Colours::transparentBlack);
         s.setColour(juce::Slider::textBoxBackgroundColourId, juce::Colours::transparentBlack);
+        s.setNumDecimalPlacesToDisplay(2);
     };
-    hideTextBox(xSlider);
-    hideTextBox(ySlider);
-    hideTextBox(xRangeSlider);
-    hideTextBox(xRateSlider);
-    hideTextBox(yRangeSlider);
-    hideTextBox(yRateSlider);
+    styleTextBox(xSlider);
+    styleTextBox(ySlider);
+    styleTextBox(xRangeSlider);
+    styleTextBox(xRateSlider);
+    styleTextBox(yRangeSlider);
+    styleTextBox(yRateSlider);
 
-    // Limit displayed decimal places so negative values fit
-    auto limitDecimals = [](juce::Slider& s, int places = 2)
-    {
-        s.setNumDecimalPlacesToDisplay(places);
-    };
-    limitDecimals(xSlider);
-    limitDecimals(ySlider);
-    limitDecimals(xRangeSlider);
-    limitDecimals(xRateSlider);
-    limitDecimals(yRangeSlider);
-    limitDecimals(yRateSlider);
-
-    // Small knobs can feel twitchy
     xRangeSlider    .setMouseDragSensitivity(200);
     xRateSlider     .setMouseDragSensitivity(200);
     yRangeSlider    .setMouseDragSensitivity(200);
@@ -73,8 +52,8 @@ WSPointComponent::WSPointComponent(
         label.setFont(juce::Font(juce::FontOptions(fontSize)));
     };
 
-    setupLabel(RangeLabel, 9.f);
-    setupLabel(RateLabel,  9.f);
+    setupLabel(RangeLabel, 10.f);
+    setupLabel(RateLabel,  10.f);
 
     // Add everything
     addAndMakeVisible(ySlider);
@@ -99,7 +78,7 @@ void WSPointComponent::paint(juce::Graphics& g)
     const float midY = bounds.getCentreY();
     g.setColour(juce::Colour(0xff3a3b90).withAlpha(0.8f));
     const float inset = 4.f;
-    const float gap = 5.f;
+    const float gap = 6.f;
     g.drawLine(bounds.getX() + inset, midY - gap, bounds.getRight() - inset, midY - gap, 1.5f);
     g.drawLine(bounds.getX() + inset, midY + gap, bounds.getRight() - inset, midY + gap, 1.5f);
 }
